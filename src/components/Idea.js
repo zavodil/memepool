@@ -10,7 +10,7 @@ const Idea = ({idea, tipMeme}) => (
         <div className='flex w-1/10 p-5'>Tags: {idea.description}</div>
         <div className='flex w-1/10 p-5'>Tips: {idea.total_tips} NEAR ({idea.vote_count})</div>
         <div className='flex w-1/10 p-5'>
-            <button className='w-7 p-2 near-btn mb-auto align-top' onClick={() => tipMeme(idea, 1)}>
+            <button className='w-7 p-2 near-btn mb-auto align-top' onClick={() => tipMeme(idea, 1, idea.owner_account_id)}>
                 Tip 1 NEAR
             </button>
         </div>

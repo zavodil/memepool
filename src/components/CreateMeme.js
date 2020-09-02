@@ -64,12 +64,12 @@ class CreateMeme extends React.Component {
                 image: this.state.image,
                 price_near: parseFloat(this.state.price),
                 link: this.state.link,
-            });
+            }, 10000000000000, parseInt(this.state.price) + "000000000000000000000000");
 
-            await this.props.contract.tip_meme({
+           /* await this.props.contract.tip_meme({
                 idea_id: idea.idea_id,
                 price_near: parseFloat(this.state.price)
-            });
+            });*/
 
         } catch (err) {
             console.error(err);

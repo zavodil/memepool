@@ -1,7 +1,7 @@
 // To conserve gas, efficient serialization is achieved through Borsh (http://borsh.io/)
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::wee_alloc;
-use near_sdk::{env, near_bindgen};
+use near_sdk::{env, near_bindgen, Promise};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -20,7 +20,7 @@ pub struct Idea {
     pub price: u128,
     pub link: String,
     pub vote_count: u32,
-    pub total_tips: u128
+    pub total_tips: u128,
 }
 
 #[derive(Debug, Clone, Default, BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
@@ -29,14 +29,23 @@ pub struct Deposit {
     pub amount: u128,
 }
 
+#[derive(Debug, Clone, Default, BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+pub struct Withdrawal {
+    pub owner_account_id: String,
+    pub amount_paid: u128,
+    pub amount_remaining: u128,
+}
+
 type DepositsByIdeas = HashMap<u64, Vec<Deposit>>;
 type DepositsByOwners = HashMap<String, Deposit>;
+type UserWithdrawals = HashMap<String, Withdrawal>;
 
 #[near_bindgen]
 #[derive(Default, BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct IdeaBankContract {
     deposits_by_ideas: DepositsByIdeas,
     deposits_by_owners: DepositsByOwners,
+    user_withdrawals: UserWithdrawals,
     ideas: HashMap<u64, Idea>,
 }
 
@@ -76,8 +85,63 @@ fn add_deposit(
     }
 }
 
+
+fn add_user_withdrawal(
+    user_withdrawals: &mut UserWithdrawals,
+    account_id: String,
+    deposit_amount: u128,
+) {
+    assert!(
+        deposit_amount >= MIN_DEPOSIT_AMOUNT,
+        "The amount of deposit is {} and it should be greater or equal to {}",
+        deposit_amount,
+        MIN_DEPOSIT_AMOUNT
+    );
+
+    user_withdrawals
+        .entry(account_id.clone())
+        .or_insert(Withdrawal {
+            owner_account_id: account_id.clone(),
+            amount_paid: 0,
+            amount_remaining: 0,
+        })
+        .amount_remaining += deposit_amount;
+}
+
+
+fn get_user_withdrawal_amount(
+    user_withdrawals: &mut UserWithdrawals,
+    account_id: String
+)  -> u128 {
+    let acc_withdraw = user_withdrawals
+        .entry(account_id.clone())
+        .or_insert(Withdrawal {
+            owner_account_id: account_id.clone(),
+            amount_paid: 0,
+            amount_remaining: 0,
+        });
+    return acc_withdraw.amount_remaining;
+}
+
+fn withdraw_amount(
+    user_withdrawals: &mut UserWithdrawals,
+    account_id: String,
+    amount: u128,
+) {
+    let acc_withdraw = user_withdrawals
+        .entry(account_id.clone())
+        .or_insert(Withdrawal {
+            owner_account_id: account_id.clone(),
+            amount_paid: 0,
+            amount_remaining: 0,
+        });
+    acc_withdraw.amount_remaining -= amount.clone();
+    acc_withdraw.amount_paid += amount;
+}
+
 #[near_bindgen]
 impl IdeaBankContract {
+    #[payable]
     pub fn create_meme(&mut self, title: String, description: String, image: String, price_near: u128, link: String) -> Option<Idea> {
         let idea_id = *self.ideas.keys().max().unwrap_or(&0u64) + 1;
 
@@ -95,26 +159,28 @@ impl IdeaBankContract {
                 price,
                 link,
                 vote_count: 0,
-                total_tips: 0// price
+                total_tips: price,
             },
         );
 
-        if price > 0 {
-            assert!(
-                price >= MIN_DEPOSIT_AMOUNT,
-                "The amount of deposit is {} and it should be greater or equal to {}",
-                price,
-                MIN_DEPOSIT_AMOUNT
-            );
+        //if price > 0 {
+        /*
+           assert!(
+               price >= MIN_DEPOSIT_AMOUNT,
+               "The amount of deposit is {} and it should be greater or equal to {}",
+               price,
+               MIN_DEPOSIT_AMOUNT
+           );
 
-            add_deposit(
-                &mut self.deposits_by_owners,
-                &mut self.deposits_by_ideas,
-                idea_id,
-                owner_account_id,
-                price,
-            );
-        }
+           add_deposit(
+               &mut self.deposits_by_owners,
+               &mut self.deposits_by_ideas,
+               idea_id,
+               owner_account_id,
+               price,
+           );
+       */
+        //}
 
         match self.ideas.get(&idea_id) {
             Some(idea) => Some(idea.clone()),
@@ -135,6 +201,17 @@ impl IdeaBankContract {
         let idea = self.ideas.get_mut(&idea_id).unwrap();
         idea.total_tips += deposit_sender_amount;
         idea.vote_count += 1;
+
+        add_user_withdrawal(&mut self.user_withdrawals, idea.owner_account_id.clone(),
+                            deposit_sender_amount);
+        /*
+        self.user_withdrawals
+            .entry(idea.owner_account_id.clone())
+            .or_insert(Deposit {
+                owner_account_id: idea.owner_account_id.clone(),
+                amount: deposit_sender_amount,
+            })
+            .amount += deposit_sender_amount;*/
 
         add_deposit(
             &mut self.deposits_by_owners,
@@ -172,6 +249,33 @@ impl IdeaBankContract {
         &self.ideas
     }
 
+    pub fn get_all_withdrawals(&self) -> &HashMap<String, Withdrawal> {
+        &self.user_withdrawals
+    }
+
+    pub fn get_all_user_deposits(&self) -> &HashMap<String, Deposit> {
+        &self.deposits_by_owners
+    }
+
+    pub fn get_all_idea_deposits(&self) -> &HashMap<u64, Vec<Deposit>> {
+        &self.deposits_by_ideas
+    }
+
+    /*
+    pub fn get_withdrawals_by_user(&self, owner_account_id: String) -> Deposit {
+        match self.user_withdrawals.get(&owner_account_id) {
+            user_withdrawals => user_withdrawals
+        }
+    }*/
+
+    pub fn get_withdrawals_by_user(&self, account_id: String) -> Option<Withdrawal> {
+        match self.user_withdrawals.get(&account_id) {
+            Some(withdrawal) => Some(withdrawal.clone()),
+            None => None,
+        }
+    }
+
+
     pub fn get_deposits_by_idea(&self, idea_id: u64) -> Option<Vec<Deposit>> {
         match self.deposits_by_ideas.get(&idea_id) {
             Some(ideas) => Some(ideas.to_vec()),
@@ -184,6 +288,34 @@ impl IdeaBankContract {
             Some(deposit) => Some(deposit.clone()),
             None => None,
         }
+    }
+
+    pub fn withdraw(&mut self, amount: u128) {
+        let amount_near = amount * 1000000000000000000000000;
+        assert!(amount_near > 0, "Withdrawal amount should be positive");
+
+        let account_id = env::predecessor_account_id();
+
+        let user_withdraw_amount_remaining = get_user_withdrawal_amount(&mut self.user_withdrawals, account_id.clone());
+
+        assert!(
+            user_withdraw_amount_remaining >= amount_near,
+            "Not enough balance to withdraw"
+        );
+
+
+        withdraw_amount(&mut self.user_withdrawals, account_id.clone(),
+                        amount_near.clone());
+
+        env::log(
+            format!(
+                "@{} withdrawing {}",
+                account_id, amount_near
+            )
+                .as_bytes(),
+        );
+
+        Promise::new(account_id).transfer(amount_near);
     }
 }
 
@@ -239,56 +371,58 @@ mod tests {
     }
 
     #[test]
-    fn alice_can_create_idea() {/*
-        let context = get_context(alice(), MIN_DEPOSIT_AMOUNT);
-        testing_env!(context);
+    fn alice_can_create_idea() {
+        /*
+                let context = get_context(alice(), MIN_DEPOSIT_AMOUNT);
+                testing_env!(context);
 
-        let mut contract = IdeaBankContract::default();
-        let title = "Near Kitties".to_string();
-        let link = "http://www.cryptokitties.co/".to_string();
+                let mut contract = IdeaBankContract::default();
+                let title = "Near Kitties".to_string();
+                let link = "http://www.cryptokitties.co/".to_string();
 
-        let idea: Idea = contract.create_idea(title.clone(), link.clone()).unwrap();
+                let idea: Idea = contract.create_idea(title.clone(), link.clone()).unwrap();
 
-        assert_eq!(title, idea.title);
-        assert_eq!(link, idea.link);
-        assert_eq!(contract.ideas.len(), 1);*/
+                assert_eq!(title, idea.title);
+                assert_eq!(link, idea.link);
+                assert_eq!(contract.ideas.len(), 1);*/
     }
 
     #[test]
-    fn eve_can_vote_bob_idea() {/*
-        let context = get_context(eve(), MIN_DEPOSIT_AMOUNT);
-        testing_env!(context);
+    fn eve_can_vote_bob_idea() {
+        /*
+                let context = get_context(eve(), MIN_DEPOSIT_AMOUNT);
+                testing_env!(context);
 
-        let mut contract = IdeaBankContract::default();
-        let title = "A gambling gaming platform".to_string();
-        let link = "https://www.247freepoker.com/".to_string();
+                let mut contract = IdeaBankContract::default();
+                let title = "A gambling gaming platform".to_string();
+                let link = "https://www.247freepoker.com/".to_string();
 
-        contract.ideas.insert(
-            1,
-            Idea {
-                idea_id: 1,
-                title,
-                link,
-                vote_count: 0,
-                owner_account_id: bob().clone(),
-            },
-        );
+                contract.ideas.insert(
+                    1,
+                    Idea {
+                        idea_id: 1,
+                        title,
+                        link,
+                        vote_count: 0,
+                        owner_account_id: bob().clone(),
+                    },
+                );
 
-        let idea = contract.upvote_idea(1);
-        assert_eq!(idea.vote_count, 1);
-        assert_eq!(
-            contract.deposits_by_owners.get(&eve()).unwrap().amount,
-            MIN_DEPOSIT_AMOUNT
-        );
-        assert_eq!(contract.deposits_by_ideas.get(&1).unwrap().len(), 1);
-        assert_eq!(
-            contract.deposits_by_ideas.get(&1).unwrap()[0].amount,
-            MIN_DEPOSIT_AMOUNT
-        );
-        assert_eq!(
-            contract.deposits_by_ideas.get(&1).unwrap()[0].owner_account_id,
-            eve()
-        );
-        */
+                let idea = contract.upvote_idea(1);
+                assert_eq!(idea.vote_count, 1);
+                assert_eq!(
+                    contract.deposits_by_owners.get(&eve()).unwrap().amount,
+                    MIN_DEPOSIT_AMOUNT
+                );
+                assert_eq!(contract.deposits_by_ideas.get(&1).unwrap().len(), 1);
+                assert_eq!(
+                    contract.deposits_by_ideas.get(&1).unwrap()[0].amount,
+                    MIN_DEPOSIT_AMOUNT
+                );
+                assert_eq!(
+                    contract.deposits_by_ideas.get(&1).unwrap()[0].owner_account_id,
+                    eve()
+                );
+                */
     }
 }
