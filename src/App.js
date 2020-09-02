@@ -6,6 +6,7 @@ import CreateMeme from "./components/CreateMeme.js";
 import Idea from "./components/Idea";
 import Withdrawal from "./components/Withdrawal";
 import UserDeposits from "./components/UserDeposits";
+import Modal from './components/Modal';
 import "regenerator-runtime/runtime";
 import "./css/index.css";
 import "./index.css";
@@ -17,9 +18,22 @@ class App extends Component {
             ideas: [],
             withdrawals: [],
             user_deposits: [],
-            current_user_remaining_withdrawal: 0
+            current_user_remaining_withdrawal: 0,
+
+            isTipModalOpen: false,
+            TipModalIdea: 0,
+            TipModalOwnerAccountId: 0,
+            tipAmount: 10
         };
     }
+
+    toggleTipModal = async ({idea_id}, owner_account_id) => {
+        this.setState({
+            isTipModalOpen: !this.state.isTipModalOpen,
+            TipModalIdea: idea_id,
+            TipModalOwnerAccountId: owner_account_id
+        });
+    };
 
     formatNearAmount(amount){
         return amount.toLocaleString().substr(0, amount.toLocaleString().length - ",000,000,000,000,000,000,000,000".length);
@@ -100,14 +114,14 @@ class App extends Component {
         }
     };
 
-    tipMeme = async ({idea_id}, deposit, owner_account_id) => {
+    tipMeme = async (idea_id, deposit, owner_account_id) => {
         const price_near = deposit ? deposit  + "000000000000000000000000" : MIN_DEPOSIT_AMOUNT;
         if (!this.props.wallet.isSignedIn()) {
             window.alert("You need to sign in to vote!");
             return;
         }
         else if(owner_account_id === this.GetConnectedAccountId()){
-            window.alert("You can't tip your own to meme");
+            window.alert("You can't tip your own meme");
             return;
         }
         try {
@@ -156,13 +170,11 @@ class App extends Component {
         const redirectIfNotSignedIn = (child) =>
             this.props.wallet.isSignedIn() ? child : <Redirect to={APP_PATH}/>;
 
-        console.log(this.props.wallet);
-
         const RenderIdeas = ({ideas}) => {
             if (ideas.length < 1) return null;
 
             const list = ideas.map((idea, i) => (
-                <Idea tipMeme={this.tipMeme} idea={idea} key={`${i}`}/>
+                <Idea toggleTipModal={this.toggleTipModal} idea={idea} key={`${i}`}/>
             ));
             return <div className='flex flex-col py-4'>{list}</div>;
         };
@@ -188,6 +200,11 @@ class App extends Component {
                 <button className='w-7 p-2 near-btn mb-auto align-top max-w-sm' onClick={() => {this.withdraw(current_user_remaining_withdrawal)}}>
                     Withdraw {current_user_remaining_withdrawal} NEAR
                 </button>
+
+
+
+
+
             </div>;
         };
 
@@ -198,6 +215,22 @@ class App extends Component {
             return <div className='flex flex-col py-4'>{list}</div>;
         };
 
+        const RenderTipModal = () => {
+            return <Modal show={this.state.isTipModalOpen}
+                   onClose={this.toggleTipModal}>
+                <div> Tip Some NEAR to {this.state.TipModalOwnerAccountId} </div>
+                <div>
+                <input type="text"
+                       value={this.state.tipAmount}
+                       onChange={event => {this.setState({tipAmount: event.target.value.replace(/\D/,'')})}}/>
+                </div>
+                <div>
+                    <button className='w-7 p-2 near-btn mb-auto align-top' onClick={() =>  {console.log(this.state); this.tipMeme(this.state.TipModalIdea, this.state.tipAmount, this.state.TipModalOwnerAccountId)}}>
+                        Tip NEAR
+                    </button>
+                </div>
+            </Modal>;
+        };
 
         return (
             <Router>
@@ -235,10 +268,14 @@ class App extends Component {
                                 <h2 className='py-4 justify-center'>Deposits LeaderBoard</h2>
                                 <RenderUserDeposits user_deposits={this.state.user_deposits}/>
 
-                                <h2 className='py-4 justify-center'>Total: {this.state.ideas.length}</h2>
+                                <h2 className='py-4 justify-center'>Total Memes Added: {this.state.ideas.length}</h2>
+
+                                <RenderTipModal />
                             </div>
                         )}
                     />
+
+
                 </Switch>
             </Router>
         );
