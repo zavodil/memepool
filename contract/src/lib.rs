@@ -13,6 +13,7 @@ const MIN_DEPOSIT_AMOUNT: u128 = 1_000_000_000_000_000_000_000_000;
 #[derive(Debug, Clone, Default, BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct Idea {
     pub idea_id: u64,
+    pub proposal_id: u64,
     pub title: String,
     pub owner_account_id: String,
     pub description: String,
@@ -111,8 +112,8 @@ fn add_user_withdrawal(
 
 fn get_user_withdrawal_amount(
     user_withdrawals: &mut UserWithdrawals,
-    account_id: String
-)  -> u128 {
+    account_id: String,
+) -> u128 {
     let acc_withdraw = user_withdrawals
         .entry(account_id.clone())
         .or_insert(Withdrawal {
@@ -142,16 +143,17 @@ fn withdraw_amount(
 #[near_bindgen]
 impl IdeaBankContract {
     #[payable]
-    pub fn create_meme(&mut self, title: String, description: String, image: String, price_near: u128, link: String) -> Option<Idea> {
+    pub fn create_meme(&mut self, title: String, description: String, image: String, proposal_id: u64, link: String) -> Option<Idea> {
         let idea_id = *self.ideas.keys().max().unwrap_or(&0u64) + 1;
 
         let owner_account_id: String = env::signer_account_id().clone();
-        let price = price_near * 1000000000000000000000000;
+        let price: u128 = 0;
 
         self.ideas.insert(
             idea_id,
             Idea {
                 idea_id,
+                proposal_id,
                 title,
                 owner_account_id: owner_account_id.clone(),
                 description,
@@ -163,24 +165,35 @@ impl IdeaBankContract {
             },
         );
 
-        //if price > 0 {
-        /*
-           assert!(
-               price >= MIN_DEPOSIT_AMOUNT,
-               "The amount of deposit is {} and it should be greater or equal to {}",
-               price,
-               MIN_DEPOSIT_AMOUNT
-           );
+        match self.ideas.get(&idea_id) {
+            Some(idea) => Some(idea.clone()),
+            None => None,
+        }
+    }
 
-           add_deposit(
-               &mut self.deposits_by_owners,
-               &mut self.deposits_by_ideas,
-               idea_id,
-               owner_account_id,
-               price,
-           );
-       */
-        //}
+    #[payable]
+    pub fn create_idea(&mut self, title: String, description: String, image: String, price_near: u128, link: String) -> Option<Idea> {
+        let idea_id = *self.ideas.keys().max().unwrap_or(&0u64) + 1;
+
+        let owner_account_id: String = env::signer_account_id().clone();
+        let price = price_near * 1000000000000000000000000;
+        let proposal_id: u64 = 0;
+
+        self.ideas.insert(
+            idea_id,
+            Idea {
+                idea_id,
+                proposal_id,
+                title,
+                owner_account_id: owner_account_id.clone(),
+                description,
+                image,
+                price,
+                link,
+                vote_count: 0,
+                total_tips: price,
+            },
+        );
 
         match self.ideas.get(&idea_id) {
             Some(idea) => Some(idea.clone()),

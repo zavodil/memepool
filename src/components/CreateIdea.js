@@ -3,7 +3,7 @@ import {Row, Col, Form, Button, Alert} from "react-bootstrap";
 import {APP_PATH} from "../constants";
 import {Link, Redirect} from "react-router-dom";
 
-class CreateMeme extends React.Component {
+class CreateIdea extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -13,8 +13,6 @@ class CreateMeme extends React.Component {
             image: "",
             price: 0,
             toHome: false,
-            proposal_id: 0,
-            proposal_title: ""
         };
     }
 
@@ -53,49 +51,35 @@ class CreateMeme extends React.Component {
         });
     }
 
-    async createMeme() {
-        //if (this.state.link.length == 0 || this.state.link.length == 0) return null;
-
+    async CreateIdea() {
+        if (this.state.link.length == 0 || this.state.link.length == 0) return null;
         this.setState({
             toHome: true,
         });
 
         try {
-            let idea = await this.props.contract.create_meme({
+            let idea = await this.props.contract.create_idea({
                 title: this.state.title,
                 description: this.state.description,
                 image: this.state.image,
-                proposal_id: this.state.proposal_id,
-                link: this.state.link || "",
-            });
+                price_near: parseFloat(this.state.price),
+                link: this.state.link,
+            }, 10000000000000, parseInt(this.state.price) + "000000000000000000000000");
 
-            /* await this.props.contract.tip_meme({
-                 idea_id: idea.idea_id,
-                 price_near: parseFloat(this.state.price)
-             });*/
+           /* await this.props.contract.tip_meme({
+                idea_id: idea.idea_id,
+                price_near: parseFloat(this.state.price)
+            });*/
 
         } catch (err) {
             console.error(err);
         }
     }
 
-    componentDidMount() {
-        if (this.props.hasOwnProperty("state")) {
-            this.setState({
-                proposal_id:  this.props.state.idea_id,
-                proposal_title: this.props.state.title
-            });
-        }
-    }
-
     render() {
         if (this.state.toHome) {
-            return <Redirect to={APP_PATH}/>;
+            return <Redirect to={APP_PATH} />;
         }
-
-        const proposalTitle = (this.state.proposal_title) ?
-            <h4 className='justify-center'>Proposal: {this.state.proposal_title}</h4> : "";
-
         return (
             <div className='flex flex-col'>
                 <div className='flex py-2 px-2 my-6'>
@@ -107,8 +91,7 @@ class CreateMeme extends React.Component {
 
                     <div className='w-4/6 px-10 bg-gray-200'>
                         <div className='w-full'>
-                            <h2 className='header justify-center'>Create a new meme</h2>
-                            {proposalTitle}
+                            <h2 className='header justify-center'>Create a meme proposal</h2>
                         </div>
                         <div className='justify-center'>
                             <Form
@@ -116,7 +99,7 @@ class CreateMeme extends React.Component {
                                 noValidate
                                 onSubmit={(e) => {
                                     e.preventDefault();
-                                    this.createMeme();
+                                    this.CreateIdea();
                                 }}
                             >
                                 <Row className='my-5'>
@@ -127,6 +110,15 @@ class CreateMeme extends React.Component {
                                             }}
                                             type='text'
                                             placeholder='Title'
+                                        />
+                                    </Col>
+                                    <Col className='my-5'>
+                                        <Form.Control
+                                            onChange={(e) => {
+                                                this.updatePrice(e.target.value);
+                                            }}
+                                            type='text'
+                                            placeholder='Price proposal'
                                         />
                                     </Col>
                                     <Col className='my-5'>
@@ -144,7 +136,7 @@ class CreateMeme extends React.Component {
                                                 this.updateLink(e.target.value);
                                             }}
                                             type='text'
-                                            placeholder='Source Link with description'
+                                            placeholder='Source Link'
                                         />
                                     </Col>
                                     <Col className='my-5'>
@@ -173,4 +165,4 @@ class CreateMeme extends React.Component {
     }
 }
 
-export default CreateMeme;
+export default CreateIdea;
