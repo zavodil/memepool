@@ -37,12 +37,13 @@ pub struct Withdrawal {
     pub amount_remaining: u128,
 }
 
-type DepositsByIdeas = HashMap<u64, Vec<Deposit>>;
+//type DepositsByIdeas = HashMap<u64, Vec<Deposit>>;
+type DepositsByIdeas = near_sdk::collections::UnorderedMap<u64, Vec<Deposit>>;
 type DepositsByOwners = HashMap<String, Deposit>;
 type UserWithdrawals = HashMap<String, Withdrawal>;
 
 #[near_bindgen]
-#[derive(Default, BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[derive(Default, BorshDeserialize, BorshSerialize)]
 pub struct IdeaBankContract {
     deposits_by_ideas: DepositsByIdeas,
     deposits_by_owners: DepositsByOwners,
@@ -65,18 +66,19 @@ fn add_deposit(
         })
         .amount += deposit_amount;
 
-    match deposits_by_ideas.get_mut(&idea_id) {
-        Some(idea) => {
+    match deposits_by_ideas.get(&idea_id) {
+        Some(mut idea) => {
             idea.push(Deposit {
                 owner_account_id: account_id.clone(),
                 amount: deposit_amount,
             });
+            deposits_by_ideas.insert(&idea_id, &idea);
             true
         }
         None => {
             deposits_by_ideas.insert(
-                idea_id.clone(),
-                vec![Deposit {
+                &idea_id,
+                &vec![Deposit {
                     owner_account_id: account_id.clone(),
                     amount: deposit_amount,
                 }],
@@ -270,16 +272,9 @@ impl IdeaBankContract {
         &self.deposits_by_owners
     }
 
-    pub fn get_all_idea_deposits(&self) -> &HashMap<u64, Vec<Deposit>> {
-        &self.deposits_by_ideas
+    pub fn get_all_idea_deposits(&self) -> HashMap<u64, Vec<Deposit>> {
+        self.deposits_by_ideas.iter().collect()
     }
-
-    /*
-    pub fn get_withdrawals_by_user(&self, owner_account_id: String) -> Deposit {
-        match self.user_withdrawals.get(&owner_account_id) {
-            user_withdrawals => user_withdrawals
-        }
-    }*/
 
     pub fn get_withdrawals_by_user(&self, account_id: String) -> Option<Withdrawal> {
         match self.user_withdrawals.get(&account_id) {

@@ -86,7 +86,7 @@ img.meme:hover{
   background-color: #fff;
   border-radius: 5px;
   max-width: 500px;
-  min-height: 200px;
+  max-height: 180px;
   margin: 0 auto;
   padding: 30px
 }
