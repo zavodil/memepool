@@ -12,13 +12,13 @@ const MIN_DEPOSIT_AMOUNT: u128 = 1_000_000_000_000_000_000_000_000;
 
 #[derive(Debug, Clone, Default, BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct Idea {
-    pub idea_id: u64,
-    pub proposal_id: u64,
+    pub idea_id: u64, // id of record
+    pub proposal_id: u64, // id of request for record // proposal_id = 0 for new request // if request's idea_id === proposal_id then it is a request who has a winner
     pub title: String,
     pub owner_account_id: String,
     pub description: String,
     pub image: String,
-    pub price: u128,
+    pub price: u128, // if price > 0 then it is meme request (proposal)
     pub link: String,
     pub vote_count: u32,
     pub total_tips: u128,
@@ -190,11 +190,19 @@ impl IdeaBankContract {
                 owner_account_id: owner_account_id.clone(),
                 description,
                 image,
-                price,
+                price: price.clone(),
                 link,
                 vote_count: 0,
                 total_tips: price,
             },
+        );
+
+        add_deposit(
+            &mut self.deposits_by_owners,
+            &mut self.deposits_by_ideas,
+            idea_id,
+            owner_account_id,
+            price,
         );
 
         match self.ideas.get(&idea_id) {
@@ -297,6 +305,42 @@ impl IdeaBankContract {
             None => None,
         }
     }
+
+    pub fn choose_winner(&mut self, idea_id: u64, proposal_id: u64) -> &Idea {
+
+        let sender_account_id: String = env::signer_account_id();
+        let proposal = self.ideas.get_mut(&proposal_id).unwrap();
+        assert!(
+            proposal.owner_account_id == sender_account_id,
+            "You tried to updated proposal of {} with account of {}",
+            proposal.owner_account_id,
+            sender_account_id
+        );
+
+        let proposal_price = proposal.price;
+        assert!(proposal_price > 0, "Proposal price should be positive");
+
+        proposal.proposal_id = proposal_id;
+
+        let idea = self.ideas.get_mut(&idea_id).unwrap();
+        idea.total_tips += proposal_price;
+        idea.vote_count += 1;
+
+        add_user_withdrawal(&mut self.user_withdrawals, idea.owner_account_id.clone(),
+                            proposal_price);
+
+
+        env::log(
+            format!(
+                "@{} choose winner {} for {}",
+                sender_account_id, idea_id, proposal_id
+            )
+                .as_bytes(),
+        );
+
+        return idea;
+    }
+
 
     pub fn withdraw(&mut self, amount: u128) {
         let amount_near = amount * 1000000000000000000000000;

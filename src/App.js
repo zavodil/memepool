@@ -59,11 +59,14 @@ class App extends Component {
     componentDidMount() {
         try {
             this.props.contract.get_all_ideas().then((ideas) => {
+                console.log(ideas);
                 for (let index in ideas) {
                     const idea = ideas[index];
                     idea.price = this.formatNearAmount(idea.price);
                     idea.total_tips = this.formatNearAmount(idea.total_tips) || 0;
-                    if(idea.proposal_id){
+                    if(!idea.price && idea.proposal_id && idea.proposal_id !== idea.idea_id) {
+                        idea.proposal_owner_account_id = ideas[idea.proposal_id].owner_account_id;
+                        idea.proposal_winner_chosen = ideas[idea.proposal_id].proposal_id !== ideas[idea.proposal_id].idea_id;
                         idea.proposal_price = ideas[idea.proposal_id].price;
                         idea.proposal_title = ideas[idea.proposal_id].title;
                     }
@@ -151,6 +154,24 @@ class App extends Component {
         }
     };
 
+    chooseWinnerMeme = async (idea_id, proposal_id) => {
+        if (!this.props.wallet.isSignedIn()) {
+            window.alert("You need to sign in to vote!");
+            return;
+        }
+        try {
+            await this.props.contract.choose_winner(
+                {
+                    idea_id,
+                    proposal_id
+                },
+                null
+            );
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
 
     upvoteIdea = async ({idea_id}) => {
         if (!this.props.wallet.isSignedIn()) {
@@ -189,9 +210,8 @@ class App extends Component {
         const RenderIdeas = ({ideas}) => {
             if (ideas.length < 1) return null;
 
-
             const list = ideas.map((idea, i) => (
-                <Idea toggleTipModal={this.toggleTipModal} submitMeme={this.SubmitMeme} idea={idea} key={`${i}`}/>
+                <Idea toggleTipModal={this.toggleTipModal} submitMeme={this.SubmitMeme} chooseWinnerMeme={this.chooseWinnerMeme} idea={idea} key={`${i}`} currentAccountId={this.GetConnectedAccountId()} />
             ));
             return <div className='flex flex-col py-4'>{list}</div>;
         };
@@ -304,7 +324,7 @@ class App extends Component {
                                     to='/create_idea'
                                     className='w-200 left near-btn justify-start ml-5'
                                 >
-                                    Add Meme Proposal
+                                    Add Meme Request
                                 </Link>
 
                                 <RenderIdeas ideas={this.state.ideas}/>

@@ -51,6 +51,11 @@ code {
   cursor: pointer;
 }
 
+.near-btn:disabled, .disabled{
+  background-color: grey;
+  cursor: default;
+}
+
 .w-1\/10 {
   width: 10%;
 }
