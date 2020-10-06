@@ -1,21 +1,65 @@
-import React from "react";
-import {Navbar, Row, Col, Button} from "react-bootstrap";
+import React, {useState} from "react";
+
+import {
+  MDBNavbar,
+  MDBNavbarBrand,
+  MDBNavbarNav,
+  MDBNavItem,
+  MDBNavLink,
+  MDBNavbarToggler,
+  MDBCollapse,
+  MDBFormInline,
+  MDBLink,
+  MDBBtn
+} from "mdbreact";
+
 import {APP_PATH} from "../constants";
-import {Link} from "react-router-dom";
 
 export default ({signIn, signOut, wallet}) => {
-    return (
-        <Navbar className='flex px-4 header-banner'>
-            <div className='flex w-1/2 p-2 font-bold title'>
-                <Link to={APP_PATH}>NEAR MEME POOL</Link>
-            </div>
-            <div className='flex w-1/2 p-2 justify-end'>
+  const [isOpen, setIsOpen] = useState(false);
+
+  console.log(wallet.isSignedIn());
+
+  const toggleCollapse = () => {
+
+  }
+
+  const handleSignIn = () => {
+    signIn();
+  }
+
+  const handleSignOut = () => {
+    signOut();
+  }
+
+  return (
+
+    <MDBNavbar color="indigo" dark expand="md">
+      <MDBNavbarBrand>
+        <MDBLink to={APP_PATH}>NEAR MEME POOL</MDBLink>
+      </MDBNavbarBrand>
+      <MDBNavbarToggler onClick={toggleCollapse}/>
+      <MDBCollapse id="navbarCollapse3" isOpen={isOpen} navbar>
+        <MDBNavbarNav left>
+          <MDBNavItem active>
+            <MDBNavLink to="/">Home</MDBNavLink>
+          </MDBNavItem>
+        </MDBNavbarNav>
+        <MDBNavbarNav right>
+          <MDBNavItem>
+            <MDBFormInline waves>
+              <div className="md-form my-0">
                 {wallet.isSignedIn() ? (
-                    <Button onClick={signOut}>Sign Out</Button>
+                  <MDBBtn color="primary" onClick={handleSignOut}>Sign Out</MDBBtn>
                 ) : (
-                    <Button onClick={signIn}>Sign In</Button>
+                  <MDBBtn color="primary" onClick={handleSignIn}>Sign In</MDBBtn>
                 )}
-            </div>
-        </Navbar>
-    );
+              </div>
+            </MDBFormInline>
+          </MDBNavItem>
+        </MDBNavbarNav>
+      </MDBCollapse>
+    </MDBNavbar>
+
+  );
 };

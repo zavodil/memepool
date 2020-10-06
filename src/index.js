@@ -1,11 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import 'bootstrap-css-only/css/bootstrap.min.css';
+import 'mdbreact/dist/css/mdb.css';
 import getConfig from "./config.js";
 import App from "./App";
 import * as nearlib from "near-api-js";
 
 // Initializing contract
 async function initContract() {
+    console.log(process.env.NODE_ENV)
     window.nearConfig = getConfig(process.env.NODE_ENV || "development");
     console.log("nearConfig", window.nearConfig);
 
