@@ -10,9 +10,9 @@ const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccoun
     const memeTitle = idea.title + (idea.proposal_title ? " (For: " + idea.proposal_title + ")" : "");
 
     let submitMemeButton = "";
-    let submitDisabledFlag = (idea.idea_id === idea.proposal_id);
-    let submitUrl = !submitDisabledFlag ? '/submit_meme' : '';
     if ((idea.price)) {
+        let submitDisabledFlag = !!idea.idea_id;
+        let submitUrl = !submitDisabledFlag ? '/submit_meme' : '';
         submitMemeButton =
             <Link className={"w-7 p-2 near-btn mb-auto align-top ml-2" + (submitDisabledFlag ? " disabled" : "")}
                   onClick={() => {
@@ -30,22 +30,34 @@ const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccoun
 
     let chooseWinnerButton = "";
     if ((!idea.price && idea.proposal_id && idea.proposal_owner_account_id === currentAccountId)) {
-        if (idea.proposal_winner_chosen)
+        if (!idea.is_proposal_winner) {
+            let chooseDisabledFlag = idea.proposal_winner_chosen;
+            let chooseUrl = !chooseDisabledFlag ? '/select_winner_meme' : '';
             chooseWinnerButton =
-                <Link className='w-7 p-2 near-btn mb-auto align-top ml-2'
+                <Link className={'w-7 p-2 near-btn mb-auto align-top ml-2' + (chooseDisabledFlag ? " disabled" : "")}
                       onClick={() => {
                           chooseWinnerMeme(idea.idea_id, idea.proposal_id);
                       }}
-                      to='/select_winner_meme'
+                      disabled={chooseDisabledFlag}
+                      to={chooseUrl}
                 >
                     Choose
                 </Link>;
-        else
+        } else
             chooseWinnerButton = <button className='w-7 p-2 near-btn mb-auto align-top ml-2'
                                          disabled={true}>
                 Winner
             </button>
 
+    }
+
+    let tipButton = "";
+    if(!idea.price) {
+        tipButton = <button className='w-7 p-2 near-btn mb-auto align-top'
+                            onClick={() => toggleTipModal(idea, idea.owner_account_id)}
+                            disabled={tipDisabledFlag}>
+            Tip
+        </button>
     }
 
 
@@ -58,11 +70,7 @@ const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccoun
             <div className='flex w-1/10 p-5'>Tags: {idea.description}</div>
             <div className='flex w-1/10 p-5'>{priceField}</div>
             <div className='flex w-1/5 p-5'>
-                <button className='w-7 p-2 near-btn mb-auto align-top'
-                        onClick={() => toggleTipModal(idea, idea.owner_account_id)}
-                        disabled={tipDisabledFlag}>
-                    Tip
-                </button>
+                {tipButton}
                 {submitMemeButton}
                 {chooseWinnerButton}
             </div>

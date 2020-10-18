@@ -33,6 +33,10 @@ class App extends Component {
     }
 
     toggleTipModal = async ({idea_id}, owner_account_id) => {
+        if (!this.props.wallet.isSignedIn()) {
+            window.alert("You need to sign in to tip!");
+            return;
+        }
         this.setState({
             isTipModalOpen: !this.state.isTipModalOpen,
             TipModalIdea: idea_id,
@@ -41,6 +45,11 @@ class App extends Component {
     };
 
     SubmitMeme = async ({idea_id}, price, title) => {
+        if (!this.props.wallet.isSignedIn()) {
+            window.alert("You need to sign in to submit meme!");
+            return;
+        }
+
         this.setState({
             submitMemeIdea: idea_id,
             submitMemePrice: price,
@@ -56,24 +65,56 @@ class App extends Component {
         return this.props.wallet._connectedAccount.accountId;
     }
 
+    GetBlackListId() {
+        return [2];
+    }
+
     componentDidMount() {
         try {
             this.props.contract.get_all_ideas().then((ideas) => {
-                console.log(ideas);
+
                 for (let index in ideas) {
                     const idea = ideas[index];
                     idea.price = this.formatNearAmount(idea.price);
                     idea.total_tips = this.formatNearAmount(idea.total_tips) || 0;
-                    if(!idea.price && idea.proposal_id && idea.proposal_id !== idea.idea_id) {
+                    if (!idea.price && idea.proposal_id) {
                         idea.proposal_owner_account_id = ideas[idea.proposal_id].owner_account_id;
-                        idea.proposal_winner_chosen = ideas[idea.proposal_id].proposal_id !== ideas[idea.proposal_id].idea_id;
+                        idea.proposal_winner_chosen = !!ideas[idea.proposal_id].proposal_id;
+                        idea.is_proposal_winner = ideas[idea.proposal_id].proposal_id === idea.idea_id;
                         idea.proposal_price = ideas[idea.proposal_id].price;
                         idea.proposal_title = ideas[idea.proposal_id].title;
                     }
                 }
 
+                console.log(ideas);
+                console.log(Object.keys(ideas));
+
+                const order_keys = Object.keys(ideas).sort(function (key1, key2) {
+                    const a = ideas[key2];
+                    const b = ideas[key1];
+                    if (b.proposal_id && !a.proposal_id)
+                        return a.idea_id < b.proposal_id ? 1 : a.idea_id > b.proposal_id ? -1 : 0;
+
+                    if (a.proposal_id && !b.proposal_id)
+                        return a.proposal_id < b.idea_id ? 1 : a.proposal_id > b.idea_id ? -1 : 0;
+
+                    return a.idea_id < b.idea_id ? 1 : a.idea_id > b.idea_id ? -1 : 0
+                });
+
+                const output_ideas = {};
+                let index = 1;
+                const blacklist = this.GetBlackListId();
+                for (let index_key of order_keys) {
+                    index_key = Number(index_key);
+
+                    if (!(blacklist.includes(index_key) || blacklist.includes(ideas[index_key].proposal_id)))
+                        output_ideas[index++] = ideas[index_key]
+                }
+
+                console.log(output_ideas);
+
                 this.setState({
-                    ideas: Object.values(ideas),
+                    ideas: Object.values(output_ideas),
                 });
 
                 //this.props.contract.get_withdrawals_by_user({account_id: "zavodil.testnet"}).then((withdrawals) => {
@@ -115,11 +156,11 @@ class App extends Component {
     }
 
     withdraw = async (withdraw_amount) => {
-        const withdraw_amount_near = parseInt(withdraw_amount); // + "000000000000000000000000";
         if (!this.props.wallet.isSignedIn()) {
             window.alert("You need to sign in to vote!");
             return;
         }
+        const withdraw_amount_near = parseInt(withdraw_amount); // + "000000000000000000000000";
         try {
             await this.props.contract.withdraw(
                 {
@@ -132,14 +173,15 @@ class App extends Component {
     };
 
     tipMeme = async (idea_id, deposit, owner_account_id) => {
-        const price_near = deposit ? deposit + "000000000000000000000000" : MIN_DEPOSIT_AMOUNT;
         if (!this.props.wallet.isSignedIn()) {
-            window.alert("You need to sign in to vote!");
+            window.alert("You need to sign in to tip!");
             return;
         } else if (owner_account_id === this.GetConnectedAccountId()) {
             window.alert("You can't tip your own meme");
             return;
         }
+
+        const price_near = deposit ? deposit + "000000000000000000000000" : MIN_DEPOSIT_AMOUNT;
         try {
             await this.props.contract.tip_meme(
                 {
@@ -156,7 +198,7 @@ class App extends Component {
 
     chooseWinnerMeme = async (idea_id, proposal_id) => {
         if (!this.props.wallet.isSignedIn()) {
-            window.alert("You need to sign in to vote!");
+            window.alert("You need to sign in to choose the winner!");
             return;
         }
         try {
@@ -211,7 +253,9 @@ class App extends Component {
             if (ideas.length < 1) return null;
 
             const list = ideas.map((idea, i) => (
-                <Idea toggleTipModal={this.toggleTipModal} submitMeme={this.SubmitMeme} chooseWinnerMeme={this.chooseWinnerMeme} idea={idea} key={`${i}`} currentAccountId={this.GetConnectedAccountId()} />
+                <Idea toggleTipModal={this.toggleTipModal} submitMeme={this.SubmitMeme}
+                      chooseWinnerMeme={this.chooseWinnerMeme} idea={idea} key={`${i}`}
+                      currentAccountId={this.GetConnectedAccountId()}/>
             ));
             return <div className='flex flex-col py-4'>{list}</div>;
         };
@@ -267,7 +311,7 @@ class App extends Component {
                         console.log(this.state);
                         this.tipMeme(this.state.TipModalIdea, this.state.tipAmount, this.state.TipModalOwnerAccountId)
                     }}>
-                        Tip NEAR
+                        Tip NEAR tokens
                     </button>
                 </div>
             </Modal>;

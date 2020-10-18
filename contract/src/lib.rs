@@ -13,7 +13,7 @@ const MIN_DEPOSIT_AMOUNT: u128 = 1_000_000_000_000_000_000_000_000;
 #[derive(Debug, Clone, Default, BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct Idea {
     pub idea_id: u64, // id of record
-    pub proposal_id: u64, // id of request for record // proposal_id = 0 for new request // if request's idea_id === proposal_id then it is a request who has a winner
+    pub proposal_id: u64, // id of request for record // proposal_id = 0 for new request // if proposal_id === winner_id then it is a request who has a winner with proposal_id = winner_id
     pub title: String,
     pub owner_account_id: String,
     pub description: String,
@@ -317,10 +317,10 @@ impl IdeaBankContract {
             sender_account_id
         );
 
-        let proposal_price = proposal.price;
-        assert!(proposal_price > 0, "Proposal price should be positive");
+        assert!(proposal.proposal_id == 0, "Proposal already has selected winner");
 
-        proposal.proposal_id = proposal_id;
+        let proposal_price = proposal.price;
+        proposal.proposal_id = idea_id;
 
         let idea = self.ideas.get_mut(&idea_id).unwrap();
         idea.total_tips += proposal_price;
