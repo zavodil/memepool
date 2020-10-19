@@ -1,44 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="81d9fc93-b5ae-4536-abc1-a9480c7858c3" name="Default Changelist" comment="" />
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <list default="true" id="81d9fc93-b5ae-4536-abc1-a9480c7858c3" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="ComposerSettings">
-    <execution>
-      <executable />
-    </execution>
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dev" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="JstyxZiC" />
   </component>
   <component name="ProjectId" id="1ge0ayhLolTvydQrEObJCGdc81D" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="true" />
     <property name="nodejs_package_manager_path" value="yarn" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
+    <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\projects\memes-guild\src\public\fonts" />
     </key>
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
-  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -51,10 +70,62 @@
       <updated>1598459817199</updated>
       <workItem from="1598459818364" duration="23615000" />
       <workItem from="1598490817703" duration="2947000" />
+      <workItem from="1603097891180" duration="1628000" />
+      <workItem from="1603107254207" duration="3984000" />
     </task>
+    <task id="LOCAL-00001" summary="css revamp">
+      <created>1603113979233</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1603113979233</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="css revamp" />
+    <option name="LAST_COMMIT_MESSAGE" value="css revamp" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="205" y="120" key="MergeDialog" timestamp="1603098163136">
+      <screen x="0" y="23" width="2048" height="1079" />
+    </state>
+    <state x="205" y="120" key="MergeDialog/0.23.2048.1079@0.23.2048.1079" timestamp="1603098163136" />
+    <state x="662" y="331" key="MultipleFileMergeDialog" timestamp="1603114004570">
+      <screen x="0" y="23" width="2048" height="1079" />
+    </state>
+    <state x="662" y="331" key="MultipleFileMergeDialog/0.23.2048.1079@0.23.2048.1079" timestamp="1603114004570" />
+    <state x="839" y="290" key="RollbackChangesDialog" timestamp="1603098259636">
+      <screen x="0" y="23" width="2048" height="1079" />
+    </state>
+    <state x="839" y="290" key="RollbackChangesDialog/0.23.2048.1079@0.23.2048.1079" timestamp="1603098259636" />
+    <state x="624" y="289" key="Vcs.Push.Dialog.v2" timestamp="1603113981360">
+      <screen x="0" y="23" width="2048" height="1079" />
+    </state>
+    <state x="624" y="289" key="Vcs.Push.Dialog.v2/0.23.2048.1079@0.23.2048.1079" timestamp="1603113981360" />
+    <state x="100" y="123" width="1848" height="879" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1603107991900">
+      <screen x="0" y="23" width="2048" height="1079" />
+    </state>
+    <state x="100" y="123" width="1848" height="879" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.23.2048.1079@0.23.2048.1079" timestamp="1603107991900" />
+    <state x="772" y="282" key="git4idea.branch.GitSmartOperationDialog" timestamp="1603098209830">
+      <screen x="0" y="23" width="2048" height="1079" />
+    </state>
+    <state x="772" y="282" key="git4idea.branch.GitSmartOperationDialog/0.23.2048.1079@0.23.2048.1079" timestamp="1603098209830" />
   </component>
 </project>
