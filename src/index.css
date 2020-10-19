@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+    background-color: gainsboro;
 }
 
 code {
@@ -33,7 +34,6 @@ code {
 }
 
 .near-btn {
-  position: relative;
   display: inline-block;
   vertical-align: top;
   padding: 10px 20px;
@@ -110,4 +110,8 @@ img.meme:hover{
 
 .modal div{
   padding-bottom: 10px
+}
+
+.meme-title {
+    font-size: 32px!important;
 }
