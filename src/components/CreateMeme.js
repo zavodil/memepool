@@ -54,7 +54,8 @@ class CreateMeme extends React.Component {
     }
 
     async createMeme() {
-        //if (this.state.link.length == 0 || this.state.link.length == 0) return null;
+        if (this.state.title.length === 0 || this.state.image.length === 0)
+            return null;
 
         this.setState({
             toHome: true,

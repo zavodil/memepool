@@ -52,7 +52,9 @@ class CreateIdea extends React.Component {
     }
 
     async CreateIdea() {
-        if (this.state.link.length == 0 || this.state.link.length == 0) return null;
+        if (this.state.title.length === 0 || parseInt(this.state.price) === 0)
+            return null;
+
         this.setState({
             toHome: true,
         });
@@ -66,10 +68,10 @@ class CreateIdea extends React.Component {
                 link: this.state.link,
             }, 10000000000000, parseInt(this.state.price) + "000000000000000000000000");
 
-           /* await this.props.contract.tip_meme({
-                idea_id: idea.idea_id,
-                price_near: parseFloat(this.state.price)
-            });*/
+            /* await this.props.contract.tip_meme({
+                 idea_id: idea.idea_id,
+                 price_near: parseFloat(this.state.price)
+             });*/
 
         } catch (err) {
             console.error(err);
@@ -78,7 +80,7 @@ class CreateIdea extends React.Component {
 
     render() {
         if (this.state.toHome) {
-            return <Redirect to={APP_PATH} />;
+            return <Redirect to={APP_PATH}/>;
         }
         return (
             <div className='flex flex-col'>
