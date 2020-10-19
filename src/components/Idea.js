@@ -29,20 +29,23 @@ const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccoun
     let tipDisabledFlag = (idea.owner_account_id === currentAccountId);
 
     let chooseWinnerButton = "";
-    if ((!idea.price && idea.proposal_id && idea.proposal_owner_account_id === currentAccountId)) {
+    if ((!idea.price && idea.proposal_id)) {
         if (!idea.is_proposal_winner) {
-            let chooseDisabledFlag = idea.proposal_winner_chosen;
-            let chooseUrl = !chooseDisabledFlag ? '/select_winner_meme' : '';
-            chooseWinnerButton =
-                <Link className={'w-7 p-2 near-btn mb-auto align-top ml-2' + (chooseDisabledFlag ? " disabled" : "")}
-                      onClick={() => {
-                          chooseWinnerMeme(idea.idea_id, idea.proposal_id);
-                      }}
-                      disabled={chooseDisabledFlag}
-                      to={chooseUrl}
-                >
-                    Choose
-                </Link>;
+            if( idea.proposal_owner_account_id === currentAccountId) {
+                let chooseDisabledFlag = idea.proposal_winner_chosen;
+                let chooseUrl = !chooseDisabledFlag ? '/select_winner_meme' : '';
+                chooseWinnerButton =
+                    <Link
+                        className={'w-7 p-2 near-btn mb-auto align-top ml-2' + (chooseDisabledFlag ? " disabled" : "")}
+                        onClick={() => {
+                            chooseWinnerMeme(idea.idea_id, idea.proposal_id);
+                        }}
+                        disabled={chooseDisabledFlag}
+                        to={chooseUrl}
+                    >
+                        Choose
+                    </Link>;
+            }
         } else
             chooseWinnerButton = <button className='w-7 p-2 near-btn mb-auto align-top ml-2'
                                          disabled={true}>
