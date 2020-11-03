@@ -1,8 +1,8 @@
 import React from "react";
-import {Row, Col, Form, Button, Alert} from "react-bootstrap";
 import {APP_PATH} from "../constants";
 import {BN} from 'bn.js'
 import {Link, Redirect} from "react-router-dom";
+import {MDBRow, MDBCol, MDBBtn, MDBLink, MDBContainer} from "mdbreact";
 
 class CreateIdea extends React.Component {
     constructor(props) {
@@ -97,7 +97,7 @@ class CreateIdea extends React.Component {
                             <h2 className='header justify-center'>Create a meme proposal</h2>
                         </div>
                         <div className='justify-center'>
-                            <Form
+                            <form
                                 className='justify-center'
                                 noValidate
                                 onSubmit={(e) => {
@@ -105,59 +105,59 @@ class CreateIdea extends React.Component {
                                     this.CreateIdea();
                                 }}
                             >
-                                <Row className='my-5'>
-                                    <Col className='my-5'>
-                                        <Form.Control
+                                <MDBRow className='my-5'>
+                                    <MDBCol className='my-5'>
+                                        <form
                                             onChange={(e) => {
                                                 this.updateTitle(e.target.value);
                                             }}
                                             type='text'
                                             placeholder='Title'
                                         />
-                                    </Col>
-                                    <Col className='my-5'>
-                                        <Form.Control
+                                    </MDBCol>
+                                    <MDBCol className='my-5'>
+                                        <form
                                             onChange={(e) => {
                                                 this.updatePrice(e.target.value);
                                             }}
                                             type='text'
                                             placeholder='Price proposal'
                                         />
-                                    </Col>
-                                    <Col className='my-5'>
-                                        <Form.Control
+                                    </MDBCol>
+                                    <MDBCol className='my-5'>
+                                        <form
                                             onChange={(e) => {
                                                 this.updateImage(e.target.value);
                                             }}
                                             type='text'
                                             placeholder='Image url'
                                         />
-                                    </Col>
-                                    <Col className='my-5'>
-                                        <Form.Control
+                                    </MDBCol>
+                                    <MDBCol className='my-5'>
+                                        <form
                                             onChange={(e) => {
                                                 this.updateLink(e.target.value);
                                             }}
                                             type='text'
                                             placeholder='Source Link'
                                         />
-                                    </Col>
-                                    <Col className='my-5'>
-                                        <Form.Control
+                                    </MDBCol>
+                                    <MDBCol className='my-5'>
+                                        <form
                                             onChange={(e) => {
                                                 this.updateDescription(e.target.value);
                                             }}
                                             type='text'
                                             placeholder='Tags'
                                         />
-                                    </Col>
-                                    <Col className='my-5'>
-                                        <Button className='near-btn' variant='primary' type='submit'>
+                                    </MDBCol>
+                                    <MDBCol className='my-5'>
+                                        <MDBBtn className='near-btn' variant='primary' type='submit'>
                                             Create
-                                        </Button>
-                                    </Col>
-                                </Row>
-                            </Form>
+                                        </MDBBtn>
+                                    </MDBCol>
+                                </MDBRow>
+                            </form>
                         </div>
                     </div>
                     <div className='w-1/6 flex'></div>
