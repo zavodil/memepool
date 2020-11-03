@@ -237,11 +237,10 @@ class App extends Component {
             window.alert("You need to sign in to vote!");
             return;
         }
-        const withdraw_amount_near = withdraw_amount.toFixed(2); // + "000000000000000000000000";
         try {
             await this.props.contract.withdraw(
                 {
-                    amount: withdraw_amount_near
+                    amount: Math.floor(parseFloat(withdraw_amount) * 100000)
                 }
             );
         } catch (err) {
