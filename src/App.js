@@ -240,7 +240,7 @@ class App extends Component {
         try {
             await this.props.contract.withdraw(
                 {
-                    amount: Math.floor(parseFloat(withdraw_amount) * 100000)
+                    amount: new BN((parseFloat(withdraw_amount) * 100000) + "0000000000000000000").toString()
                 }
             );
         } catch (err) {

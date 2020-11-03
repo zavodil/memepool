@@ -419,31 +419,31 @@ impl IdeaBankContract {
         }
     }
 
-    pub fn withdraw(&mut self, amount: u128) {
-        let amount_near = amount * 10000000000000000000;
-        assert!(amount_near > 0, "Withdrawal amount should be positive");
+    pub fn withdraw(&mut self, amount: near_sdk::json_types::U128) {
+        let amount: u128 = amount.into();
+        assert!(amount > 0, "Withdrawal amount should be positive");
 
         let account_id = env::predecessor_account_id();
 
         let user_withdraw_amount_remaining = get_user_withdrawal_amount(&mut self.user_withdrawals, account_id.clone());
 
         assert!(
-            user_withdraw_amount_remaining >= amount_near,
+            user_withdraw_amount_remaining >= amount,
             "Not enough balance to withdraw"
         );
 
         withdraw_amount(&mut self.user_withdrawals, account_id.clone(),
-                        amount_near);
+                        amount);
 
         env::log(
             format!(
                 "@{} withdrawing {}",
-                account_id, amount_near
+                account_id, amount
             )
                 .as_bytes(),
         );
 
-        Promise::new(account_id).transfer(amount_near);
+        Promise::new(account_id).transfer(amount);
     }
 }
 
