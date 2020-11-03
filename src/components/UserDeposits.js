@@ -12,9 +12,9 @@ const UserDeposits = ({user_deposits}) => (
                 </TableHead>
                 <TableBody>
                     {user_deposits.map((row) => (
-                        <TableRow key={row.owner_account_id}>
+                        <TableRow key={row.account_id}>
                             <TableCell component="th" scope="row">
-                                {row.owner_account_id}
+                                {row.account_id}
                             </TableCell>
                             <TableCell align="right">{row.amount}</TableCell>
                         </TableRow>

@@ -32,7 +32,7 @@ async function initContract() {
         window.nearConfig.contractName,
         {
             // View methods are read only. They don't modify the state, but usually return some value.
-            viewMethods: ["get_all_ideas", "get_all_withdrawals", "get_withdrawals_by_user", "get_all_user_deposits", "get_all_idea_deposits", "get_deposits_by_idea", "get_deposits_by_owner"],
+            viewMethods: ["get_all_ideas", "get_idea_by_id", "get_all_withdrawals", "get_withdrawals_by_user", "get_all_user_deposits", "get_all_idea_deposits", "get_deposits_by_idea", "get_deposits_by_owner", "get_num_ideas"],
             // Change methods can modify the state. But you don't receive the returned value when called.
             changeMethods: ["create_meme", "create_idea", "tip_meme", "upvote_idea", "withdraw", "choose_winner"],
             // Sender is the account ID to initialize transactions.
