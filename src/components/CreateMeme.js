@@ -98,7 +98,7 @@ class CreateMeme extends React.Component {
             <h4 className='justify-center'>Proposal: {this.state.proposal_title}</h4> : "";
 
         return (
-            <div className='flex flex-col'>
+            <div className='form-container flex flex-col'>
                 <div className='flex py-2 px-2 my-6'>
                     <div className='w-1/6 flex mb-auto align-top'>
                         <div className='near-btn'>

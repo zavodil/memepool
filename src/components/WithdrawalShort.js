@@ -8,7 +8,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
-const UserDeposits = ({user_deposits}) => (
+const WithdrawalShort = ({withdrawals}) => (
         <TableContainer component={Paper}>
             <Table aria-label="simple table">
                 <TableHead>
@@ -18,12 +18,12 @@ const UserDeposits = ({user_deposits}) => (
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {user_deposits.map((row) => (
-                        <TableRow key={row.account_id}>
+                    {withdrawals.map((row) => (
+                        <TableRow key={row.owner_account_id}>
                             <TableCell component="th" scope="row">
-                                {row.account_id}
+                                {row.owner_account_id}
                             </TableCell>
-                            <TableCell align="right">{row.amount}</TableCell>
+                            <TableCell align="right">{row.total}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
@@ -31,20 +31,4 @@ const UserDeposits = ({user_deposits}) => (
         </TableContainer>
 );
 
-export default UserDeposits;
-
-
-/*
-
-import React from "react";
-import {Card} from "react-bootstrap";
-
-const Withdrawal = ({withdrawal}) => (
-    <Card className='bg-gray-400 px-4 flex'>
-        <div className='flex w-1/2 p-5'>Author: {withdrawal.owner_account_id}</div>
-        <div className='flex w-1/2 p-5'>Total Tips: {withdrawal.amount}</div>
-    </Card>
-);
-
-export default Withdrawal;
-*/
+export default WithdrawalShort;

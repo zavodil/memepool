@@ -6,14 +6,14 @@ import {Link} from "react-router-dom";
 export default ({signIn, signOut, wallet}) => {
     return (
         <Navbar className='flex px-4 header-banner'>
-            <div className='flex w-1/2 p-2 font-bold title'>
-                <Link to={APP_PATH}>NEAR MEME POOL</Link>
+            <div className='flex w-full p-2 font-bold title'>
+                <Link to={APP_PATH}>NEAR&nbsp;MEME&nbsp;POOL</Link>
             </div>
-            <div className='flex w-1/2 p-2 justify-end'>
+            <div className='flex p-2 justify-end'>
                 {wallet.isSignedIn() ? (
-                    <Button onClick={signOut}>Sign Out</Button>
+                    <Button onClick={signOut}>Sign&nbsp;Out</Button>
                 ) : (
-                    <Button onClick={signIn}>Sign In</Button>
+                    <Button onClick={signIn}>Sign&nbsp;In</Button>
                 )}
             </div>
         </Navbar>

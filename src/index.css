@@ -86,6 +86,10 @@ img.meme:hover{
   padding: 50px;
 }
 
+.meme-proposal{
+  white-space: nowrap;
+}
+
 .modal{
   position: relative;
   background-color: #fff;
@@ -114,4 +118,97 @@ img.meme:hover{
 
 .meme-title {
     font-size: 32px!important;
+}
+
+.navbar{
+  position: fixed;
+  width: 100%;
+  top: 0;
+}
+
+.form-container{
+  margin-top: 52px;
+  width:100%
+}
+
+.sidebar {
+  margin: 0;
+  padding: 0;
+  width: 200px;
+  background-color: #f1f1f1;
+  position: fixed;
+  height: 100%;
+  overflow: auto;
+  float: left;
+}
+
+.sidebar a {
+  display: block;
+  color: black;
+  padding: 16px;
+  text-decoration: none;
+}
+
+.sidebar a.active {
+  background-color: #ff585d75;
+  color: white;
+}
+
+.sidebar a:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+
+.sidebar-right {
+  padding: 10px;
+  width: 300px;
+  background-color: #f1f1f1;
+  height: 100%;
+  overflow: auto;
+  float: right;
+}
+div.content {
+  margin-left: 200px;
+  padding: 1px 16px;
+  height: 100%;
+  width: calc(100% - 510px);
+  float: left;
+  text-align: center;
+}
+
+@media screen and (max-width: 1024px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .sidebar a {
+    float: left;
+    padding: 15px;
+  }
+  div.content {margin-left: 0;}
+
+  .sidebar-right {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .sidebar-right a { text-align: center;
+    float: none;}
+  div.content {margin-left: 0; margin-right: 0;  width: 100%;}
+  .meme {width:100%}
+}
+
+@media screen and (max-width: 400px) {
+  .sidebar a {
+    text-align: center;
+    float: none;
+  }
+  div.content{
+    width: 100%;
+  }
+}
+
+.withdrawals-table{
+  max-width: 800px;
 }

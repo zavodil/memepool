@@ -1,6 +1,7 @@
 import React from "react";
 import {Row, Col, Form, Button, Alert} from "react-bootstrap";
 import {APP_PATH} from "../constants";
+import {BN} from 'bn.js'
 import {Link, Redirect} from "react-router-dom";
 
 class CreateIdea extends React.Component {
@@ -52,21 +53,21 @@ class CreateIdea extends React.Component {
     }
 
     async CreateIdea() {
-        if (this.state.title.length === 0 || parseInt(this.state.price) === 0)
+        if (this.state.title.length === 0 || parseFloat(this.state.price) === 0)
             return null;
 
         this.setState({
             toHome: true,
         });
 
+        const price_near = new BN(this.state.price * 100000).mul(new BN("10000000000000000000")).toString();
         try {
             let idea = await this.props.contract.create_idea({
                 title: this.state.title,
                 description: this.state.description,
                 image: this.state.image,
-                price_near: parseFloat(this.state.price),
                 link: this.state.link,
-            }, 10000000000000, parseInt(this.state.price) + "000000000000000000000000");
+            }, 10000000000000, price_near);
 
             /* await this.props.contract.tip_meme({
                  idea_id: idea.idea_id,
@@ -83,7 +84,7 @@ class CreateIdea extends React.Component {
             return <Redirect to={APP_PATH}/>;
         }
         return (
-            <div className='flex flex-col'>
+            <div className='form-container flex flex-col'>
                 <div className='flex py-2 px-2 my-6'>
                     <div className='w-1/6 flex mb-auto align-top'>
                         <div className='near-btn'>

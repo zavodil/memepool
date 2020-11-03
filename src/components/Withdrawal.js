@@ -7,9 +7,18 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import {APP_PATH} from "../constants";
+import {Link} from "react-router-dom";
 
 const Withdrawal = ({withdrawals}) => (
-        <TableContainer component={Paper}>
+    <div className='form-container flex flex-col'>
+        <div className='flex py-2 px-2 my-6'>
+            <div className='w-1/6 flex mb-auto align-top'>
+                <div className='near-btn'>
+                    <Link to={APP_PATH}>Back</Link>
+                </div>
+            </div>
+        <TableContainer component={Paper} className='withdrawals-table'>
             <Table aria-label="simple table">
                 <TableHead>
                     <TableRow>
@@ -33,6 +42,8 @@ const Withdrawal = ({withdrawals}) => (
                 </TableBody>
             </Table>
         </TableContainer>
+        </div>
+    </div>
 );
 
 export default Withdrawal;
