@@ -6,6 +6,7 @@ import CreateMeme from "./components/CreateMeme.js";
 import CreateIdea from "./components/CreateIdea.js";
 import HelmetMetaData from "./components/HelmetMetaData.js";
 import {BN} from 'bn.js'
+import Common from './functions.js'
 import Idea from "./components/Idea";
 import Profile from "./components/Profile";
 import Withdrawal from "./components/Withdrawal";
@@ -15,9 +16,7 @@ import Modal from './components/Modal';
 import "regenerator-runtime/runtime";
 import "./css/index.css";
 import "./index.css";
-import { utils } from 'near-api-js'
-
-const FRAC_DIGITS = 5
+import RandomMeme from "./components/RandomMeme";
 
 class App extends Component {
     constructor(props) {
@@ -66,46 +65,12 @@ class App extends Component {
     };
 
 
-    formatNearAmount(amount) {
-        if(!amount)
-            return 0;
-
-        amount =this.toFixed(amount);
-        //return amount.toLocaleString().substr(0, amount.toLocaleString().length - ",000,000,000,000,000,000,000,000".length);
-        let ret =  utils.format.formatNearAmount(amount.toString(), FRAC_DIGITS)
-        console.log(ret)
-        if (amount === '0') {
-            return amount;
-        } else if (ret === '0') {
-            return `<${!FRAC_DIGITS ? `0` : `0.${'0'.repeat((FRAC_DIGITS || 1) - 1)}1`}`;
-        }
-        return ret;
-    }
-
-    toFixed(x) {
-        if (Math.abs(x) < 1.0) {
-            let e = parseInt(x.toString().split('e-')[1]);
-            if (e) {
-                x *= Math.pow(10,e-1);
-                x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
-            }
-        } else {
-            let e = parseInt(x.toString().split('+')[1]);
-            if (e > 20) {
-                e -= 20;
-                x /= Math.pow(10,e);
-                x += (new Array(e+1)).join('0');
-            }
-        }
-        return x;
-    }
-
     GetConnectedAccountId() {
         return this.props.wallet._connectedAccount.accountId;
     }
 
     GetBlackListId() {
-        return [7];
+        return [];
     }
 
     componentDidMount() {
@@ -114,23 +79,8 @@ class App extends Component {
                 console.log("get_all_ideas");
                 console.log(ideas);
 
-                for (let index in ideas) {
-                    const idea = ideas[index];
-                    idea.price = this.formatNearAmount(idea.price);
-                    idea.total_tips = this.formatNearAmount(idea.total_tips);
-                    if (!idea.price && idea.proposal_id) {
-                        idea.proposal_owner_account_id = ideas[idea.proposal_id].owner_account_id;
-                        idea.proposal_winner_chosen = !!ideas[idea.proposal_id].proposal_id;
-                        idea.is_proposal_winner = ideas[idea.proposal_id].proposal_id === idea.idea_id;
-                        idea.proposal_price = ideas[idea.proposal_id].price || 0;
-                        idea.proposal_title = ideas[idea.proposal_id].title || "";
-                    }
-
-                    if(idea.price && ideas.hasOwnProperty(idea.proposal_id)) {
-                        idea.proposal_winner_title = ideas[idea.proposal_id].title || "";
-                        idea.proposal_winner_id = ideas[idea.proposal_id].idea_id || 0;
-                    }
-                }
+                for (let index in ideas)
+                    ideas[index] = Common.GetIdeaAdvancedFields(ideas[index], ideas);
 
                 const order_keys = Object.keys(ideas).sort(function (key1, key2) {
                     const a = ideas[key2];
@@ -164,9 +114,9 @@ class App extends Component {
                     console.log(withdrawals);
                     for (let index in withdrawals) {
                         const withdrawal = withdrawals[index];
-                        withdrawal.total = this.formatNearAmount(withdrawal.amount_paid + withdrawal.amount_remaining) || 0;
-                        withdrawal.amount_paid = this.formatNearAmount(withdrawal.amount_paid) || 0;
-                        withdrawal.amount_remaining = this.formatNearAmount(withdrawal.amount_remaining) || 0;
+                        withdrawal.total = Common.formatNearAmount(withdrawal.amount_paid + withdrawal.amount_remaining) || 0;
+                        withdrawal.amount_paid = Common.formatNearAmount(withdrawal.amount_paid) || 0;
+                        withdrawal.amount_remaining = Common.formatNearAmount(withdrawal.amount_remaining) || 0;
 
                         if (withdrawal.owner_account_id === this.GetConnectedAccountId()) {
                             this.setState({
@@ -197,10 +147,10 @@ class App extends Component {
                         console.log(user_deposits);
                         for (let user_account_id in user_deposits) {
                             let user_total_deposit = 0;
-                            for(let deposit of user_deposits[user_account_id]){
+                            for (let deposit of user_deposits[user_account_id]) {
                                 user_total_deposit += deposit.amount;
                             }
-                            user_deposits[user_account_id].amount = this.formatNearAmount(user_total_deposit) || 0;
+                            user_deposits[user_account_id].amount = Common.formatNearAmount(user_total_deposit) || 0;
                             user_deposits[user_account_id].account_id = user_account_id;
                         }
 
@@ -341,13 +291,16 @@ class App extends Component {
                 <a className="active" href="/memeguild">Home</a>
                 <a href="/create_meme">Add&nbsp;Meme</a>
                 <a href="/create_idea">Add&nbsp;Idea</a>
-                <a href="/withdrawals">Withdrawals</a>
+                <a href="/random">Random</a>
             </div>;
         };
 
         const RenderRightSidebar = () => {
             return <div className="sidebar-right">
                 <div className="container mx-auto mt-1 max-w-2xl">
+                    <h2 className='py-4 justify-center'>Deposits LeaderBoard</h2>
+                    <RenderUserDeposits user_deposits={this.state.user_deposits}/>
+
                     <h2 className='py-4 justify-center'>Meme Authors LeaderBoard</h2>
                     <RenderWithdrawalsShort withdrawals={this.state.withdrawals}/>
 
@@ -358,12 +311,12 @@ class App extends Component {
                     <RenderCurrentUserAmountPaid
                         current_user_amount_paid={this.state.current_user_amount_paid}/>
 
-                    <h2 className='py-4 justify-center'>Deposits LeaderBoard</h2>
-                    <RenderUserDeposits user_deposits={this.state.user_deposits}/>
+
 
                     <h2 className='py-4 justify-center'>Total Memes
                         Added: {this.state.ideas.length}</h2>
 
+                    <h2 className='py-4 justify-center underline'><a href="/withdrawals">Withdrawals</a></h2>
                 </div>
 
             </div>;
@@ -496,11 +449,12 @@ class App extends Component {
             if (!current_user_remaining_withdrawal)
                 return null;
 
-            return <div className='flex flex-col py-4'>Available to withdraw: {current_user_remaining_withdrawal} NEAR
+            let current_user_remaining_withdrawal_rounded = parseFloat(current_user_remaining_withdrawal).toFixed(2);
+            return <div className='flex flex-col py-4 text-center'>Congrats, you have available reward!
                 <button className='w-7 p-2 near-btn mb-auto align-top max-w-sm' onClick={() => {
                     this.withdraw(current_user_remaining_withdrawal)
                 }}>
-                    Withdraw {current_user_remaining_withdrawal} NEAR
+                    Withdraw {current_user_remaining_withdrawal_rounded} NEAR
                 </button>
 
 
@@ -560,13 +514,18 @@ class App extends Component {
                     <Switch>
 
 
-                        <Route path="/meme/:id" component={RenderIdeaPage}>
-
-                        </Route>
+                        <Route path="/meme/:id" component={RenderIdeaPage}/>
 
                         <Route path='/profile'>
                             {
                                 <Profile contract={this.props.contract} wallet={this.props.wallet}/>
+                            }
+                        </Route>
+
+                        <Route path='/random'>
+                            {
+                                <RandomMeme contract={this.props.contract} wallet={this.props.wallet}
+                                            ideas={this.state.ideas}/>
                             }
                         </Route>
 

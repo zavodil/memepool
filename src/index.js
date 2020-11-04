@@ -1,8 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import 'bootstrap-css-only/css/bootstrap.min.css';
-import 'mdbreact/dist/css/mdb.css';
 import getConfig from "./config.js";
 import App from "./App";
 import * as nearlib from "near-api-js";
@@ -32,7 +30,7 @@ async function initContract() {
         window.nearConfig.contractName,
         {
             // View methods are read only. They don't modify the state, but usually return some value.
-            viewMethods: ["get_all_ideas", "get_idea_by_id", "get_all_withdrawals", "get_withdrawals_by_user", "get_all_user_deposits", "get_all_idea_deposits", "get_deposits_by_idea", "get_deposits_by_owner", "get_num_ideas"],
+            viewMethods: ["get_all_ideas", "get_idea_by_id", "get_all_withdrawals", "get_withdrawals_by_user", "get_all_user_deposits", "get_all_idea_deposits", "get_deposits_by_idea", "get_deposits_by_owner", "get_num_ideas", "get_random_meme"],
             // Change methods can modify the state. But you don't receive the returned value when called.
             changeMethods: ["create_meme", "create_idea", "tip_meme", "upvote_idea", "withdraw", "choose_winner"],
             // Sender is the account ID to initialize transactions.

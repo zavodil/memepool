@@ -328,6 +328,15 @@ impl IdeaBankContract {
         self.max_idea_id
     }
 
+    pub fn get_random_meme(&self) -> Option<Idea> {
+        let seed = near_sdk::env::random_seed();
+        let idea_id =  (u64::from(seed[0]) % (self.max_idea_id)) + 1;
+        match self.ideas.get(&idea_id) {
+            Some(idea) => Some(idea),
+            None => None,
+        }
+    }
+
     pub fn get_all_ideas(&self) -> HashMap<u64, Idea> {
         self.ideas.iter().collect()
     }

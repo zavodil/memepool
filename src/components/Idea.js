@@ -24,9 +24,10 @@ function smartTrim(str, length, delim, appendix) {
     return trimmedStr;
 }
 
-const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccountId}) => {
-    console.log("idea");
-    console.log(idea);
+const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccountId, aloneMode}) => {
+    if(aloneMode === undefined)
+        aloneMode = false;
+
     const priceField = (idea.price ? `Price: ${idea.price} NEAR. ` : "") +
         (idea.proposal_price ? `Proposal: ${idea.proposal_price} NEAR. ` : "") +
         `Tips: ${idea.total_tips} NEAR ` + (idea.vote_count ? `(${idea.vote_count})` : "");
@@ -57,7 +58,7 @@ const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccoun
         : "";
 
     let submitMemeButton = "";
-    if ((idea.price)) {
+    if (!aloneMode && (idea.price)) {
         let submitDisabledFlag = !!idea.proposal_id;
         let submitUrl = !submitDisabledFlag ? '/submit_meme' : '';
         submitMemeButton =
@@ -68,7 +69,7 @@ const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccoun
                   disabled={submitDisabledFlag}
                   to={submitUrl}
             >
-                Submit meme to earn { parseFloat(idea.price).toFixed(2)} NEAR
+                Submit meme to earn {parseFloat(idea.price).toFixed(2)} NEAR
             </Link>;
 
     }
@@ -120,6 +121,9 @@ const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccoun
 
     const memelink = "/meme/" + idea.idea_id;
 
+    const imgBlock = (idea.image && (idea.image.match(/\.(jpeg|jpg|gif|png)$/) != null)) ?
+        <img className="w-full" src={idea.image} alt="meme"/> : "";
+
     return (
         <div className="meme pt-3 pb-3 mx-auto">
             <div className="max-w-2xl rounded overflow-hidden shadow-lg bg-white">
@@ -135,7 +139,7 @@ const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccoun
                         {proposalButton}{winnerButton}
                     </div>
                 </div>
-                <img className="w-full" src={idea.image} alt="meme"/>
+                {imgBlock}
 
                 <div className="my-4 mx-2 meme-action-buttons">
                     {submitMemeButton}
@@ -150,7 +154,7 @@ const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccoun
                     <span
                         className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">{priceField}</span>
 
-                    <span className='inline-block align-bottom'>
+                    <span className='inline-block align-middle'>
                     <TwitterShareButton url={'http://near.gagcraft.com' + memelink} title={idea.title}
                                         via='near_protocol' hashtags={tagsArray}>
                         <TwitterIcon size={20} round={true}/></TwitterShareButton>&nbsp;
