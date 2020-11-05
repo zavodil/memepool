@@ -6,6 +6,7 @@ import CreateMeme from "./components/CreateMeme.js";
 import CreateIdea from "./components/CreateIdea.js";
 import HelmetMetaData from "./components/HelmetMetaData.js";
 import {BN} from 'bn.js'
+import {utils} from 'near-api-js'
 import Common from './functions.js'
 import Idea from "./components/Idea";
 import Profile from "./components/Profile";
@@ -17,6 +18,8 @@ import "regenerator-runtime/runtime";
 import "./css/index.css";
 import "./index.css";
 import RandomMeme from "./components/RandomMeme";
+
+const FRAC_DIGITS = 5
 
 class App extends Component {
     constructor(props) {
@@ -114,9 +117,9 @@ class App extends Component {
                     console.log(withdrawals);
                     for (let index in withdrawals) {
                         const withdrawal = withdrawals[index];
-                        withdrawal.total = Common.formatNearAmount(withdrawal.amount_paid + withdrawal.amount_remaining) || 0;
-                        withdrawal.amount_paid = Common.formatNearAmount(withdrawal.amount_paid) || 0;
-                        withdrawal.amount_remaining = Common.formatNearAmount(withdrawal.amount_remaining) || 0;
+                        withdrawal.amount_paid = Number(utils.format.formatNearAmount(withdrawal.amount_paid, FRAC_DIGITS));
+                        withdrawal.amount_remaining = Number(utils.format.formatNearAmount(withdrawal.amount_remaining, FRAC_DIGITS));
+                        withdrawal.total = withdrawal.amount_paid + withdrawal.amount_remaining;
 
                         if (withdrawal.owner_account_id === this.GetConnectedAccountId()) {
                             this.setState({
@@ -148,9 +151,9 @@ class App extends Component {
                         for (let user_account_id in user_deposits) {
                             let user_total_deposit = 0;
                             for (let deposit of user_deposits[user_account_id]) {
-                                user_total_deposit += deposit.amount;
+                                user_total_deposit += Number(utils.format.formatNearAmount(deposit.amount, FRAC_DIGITS));
                             }
-                            user_deposits[user_account_id].amount = Common.formatNearAmount(user_total_deposit) || 0;
+                            user_deposits[user_account_id].amount = user_total_deposit || 0;
                             user_deposits[user_account_id].account_id = user_account_id;
                         }
 
@@ -190,7 +193,7 @@ class App extends Component {
         try {
             await this.props.contract.withdraw(
                 {
-                    amount: new BN((parseFloat(withdraw_amount) * 100000) + "0000000000000000000").toString()
+                    amount: utils.format.parseNearAmount(withdraw_amount)
                 }
             );
         } catch (err) {
@@ -207,14 +210,13 @@ class App extends Component {
             return;
         }
 
-        const price_near = new BN(deposit * 100000).mul(new BN("10000000000000000000")).toString();
         try {
             await this.props.contract.tip_meme(
                 {
                     idea_id
                 },
                 null,
-                price_near
+                utils.format.parseNearAmount(deposit)
             );
         } catch (err) {
             console.error(err);
@@ -310,7 +312,6 @@ class App extends Component {
 
                     <RenderCurrentUserAmountPaid
                         current_user_amount_paid={this.state.current_user_amount_paid}/>
-
 
 
                     <h2 className='py-4 justify-center'>Total Memes
@@ -484,7 +485,7 @@ class App extends Component {
                 <div>
                     <input autoFocus={true} type="text"
                            onChange={(event) => {
-                               this.tipAmount = Number(event.target.value.replace(/[^0-9.]/g, ''))
+                               this.tipAmount = event.target.value.replace(/[^0-9.]/g, '')
                            }
                            }
                     />

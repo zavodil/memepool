@@ -14,7 +14,8 @@ class CreateMeme extends React.Component {
             price: 0,
             toHome: false,
             proposal_id: 0,
-            proposal_title: ""
+            proposal_title: "",
+            valid: true
         };
     }
 
@@ -22,13 +23,6 @@ class CreateMeme extends React.Component {
         this.setState({
             ...this.state,
             title: val,
-        });
-    }
-
-    updatePrice(val) {
-        this.setState({
-            ...this.state,
-            price: val,
         });
     }
 
@@ -40,9 +34,11 @@ class CreateMeme extends React.Component {
     }
 
     updateImage(val) {
+        const valid = (val.match(/\.(jpeg|jpg|gif|png)$/) != null);
         this.setState({
             ...this.state,
             image: val,
+            valid_image: valid,
         });
     }
 
@@ -54,7 +50,7 @@ class CreateMeme extends React.Component {
     }
 
     async createMeme() {
-        if (this.state.title.length === 0 || this.state.image.length === 0)
+        if (this.state.title.length === 0 || this.state.image.length === 0 || !this.state.valid_image)
             return null;
 
         this.setState({
@@ -62,7 +58,7 @@ class CreateMeme extends React.Component {
         });
 
         try {
-            let idea = await this.props.contract.create_meme({
+            await this.props.contract.create_meme({
                 title: this.state.title,
                 description: this.state.description,
                 image: this.state.image,
@@ -83,7 +79,7 @@ class CreateMeme extends React.Component {
     componentDidMount() {
         if (this.props.hasOwnProperty("state")) {
             this.setState({
-                proposal_id:  this.props.state.idea_id,
+                proposal_id: this.props.state.idea_id,
                 proposal_title: this.props.state.title
             });
         }
@@ -97,6 +93,9 @@ class CreateMeme extends React.Component {
         const proposalTitle = (this.state.proposal_title) ?
             <h4 className='justify-center'>Proposal: {this.state.proposal_title}</h4> : "";
 
+        const preview = this.state.image ?
+            (this.state.valid_image ? <img src={this.state.image} width={200}/> : <div>Invalid image link</div>) : "";
+
         return (
             <div className='form-container flex flex-col'>
                 <div className='flex py-2 px-2 my-6'>
@@ -106,67 +105,75 @@ class CreateMeme extends React.Component {
                         </div>
                     </div>
 
-                    <div className='w-4/6 px-10 bg-gray-200'>
+                    <div className='w-4/6 px-10 bg-gray-200 pb-3'>
                         <div className='w-full'>
                             <h2 className='header justify-center'>Create a new meme</h2>
                             {proposalTitle}
                         </div>
-                        <div className='justify-center'>
-                            <Form
-                                className='justify-center'
-                                noValidate
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    this.createMeme();
-                                }}
-                            >
-                                <Row className='my-5'>
-                                    <Col className='my-5'>
-                                        <Form.Control
-                                            onChange={(e) => {
-                                                this.updateTitle(e.target.value);
-                                            }}
-                                            type='text'
-                                            placeholder='Title'
-                                        />
-                                    </Col>
-                                    <Col className='my-5'>
-                                        <Form.Control
-                                            onChange={(e) => {
-                                                this.updateImage(e.target.value);
-                                            }}
-                                            type='text'
-                                            placeholder='Image url'
-                                        />
-                                    </Col>
-                                    <Col className='my-5'>
-                                        <Form.Control
-                                            onChange={(e) => {
-                                                this.updateLink(e.target.value);
-                                            }}
-                                            type='text'
-                                            placeholder='Source Link with description'
-                                        />
-                                    </Col>
-                                    <Col className='my-5'>
-                                        <Form.Control
-                                            onChange={(e) => {
-                                                this.updateDescription(e.target.value);
-                                            }}
-                                            type='text'
-                                            placeholder='Tags'
-                                        />
-                                    </Col>
-                                    <Col className='my-5'>
-                                        <Button className='near-btn' variant='primary' type='submit'>
-                                            Create
-                                        </Button>
-                                    </Col>
-                                </Row>
-                            </Form>
+                        <div className='block'>
+                            <div className='justify-center inline-block'>
+                                <Form
+                                    className='justify-center'
+                                    noValidate
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        this.createMeme();
+                                    }}
+                                >
+                                    <Row className='my-5'>
+                                        <Col className='my-5'>
+                                            <Form.Control
+                                                onChange={(e) => {
+                                                    this.updateTitle(e.target.value);
+                                                }}
+                                                type='text'
+                                                placeholder='Title'
+                                            />
+                                        </Col>
+                                        <Col className='my-5'>
+                                            <Form.Control
+                                                onChange={(e) => {
+                                                    this.updateImage(e.target.value);
+                                                }}
+                                                type='text'
+                                                placeholder='Image url'
+                                            />
+                                        </Col>
+                                        <Col className='my-5'>
+                                            <Form.Control
+                                                onChange={(e) => {
+                                                    this.updateLink(e.target.value);
+                                                }}
+                                                type='text'
+                                                placeholder='Source Link with description'
+                                            />
+                                        </Col>
+                                        <Col className='my-5'>
+                                            <Form.Control
+                                                onChange={(e) => {
+                                                    this.updateDescription(e.target.value);
+                                                }}
+                                                type='text'
+                                                placeholder='Tags'
+                                            />
+                                        </Col>
+                                        <Col className='my-5'>
+                                            <Button className='near-btn' variant='primary' type='submit'>
+                                                Create
+                                            </Button>
+                                        </Col>
+                                    </Row>
+                                </Form>
+                            </div>
+                            <div className='justify-center inline-block pl-1 align-top'>
+                                <div className='create-meme-preview my-2'>
+                                    {preview}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div className='w-1/6 flex'></div>
+                    <div className='w-1/6 flex'>
+                    </div>
 
                 </div>
             </div>

@@ -15,7 +15,7 @@ package-lock.json
 
 # build
 /contract/target
-/res
+/contract/res/
 .cache
 
 # production

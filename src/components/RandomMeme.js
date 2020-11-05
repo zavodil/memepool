@@ -121,7 +121,7 @@ class RandomMeme extends React.Component {
                     <div>
                         <input autoFocus={true} type="text"
                                onChange={(event) => {
-                                   this.tipAmount = Number(event.target.value.replace(/[^0-9.]/g, ''))
+                                   this.tipAmount = event.target.value.replace(/[^0-9.]/g, '')
                                }
                                }
                         />

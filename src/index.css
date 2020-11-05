@@ -199,6 +199,18 @@ div.content {
   .meme {width:100%}
 }
 
+@media screen and (max-width: 640px) {
+  .create-meme-preview{
+    padding-top: 0!important;
+    padding-left: 0!important;
+  }
+
+  .create-idea-preview{
+    padding-top: 0!important;
+    padding-left: 0!important;
+  }
+}
+
 @media screen and (max-width: 400px) {
   .sidebar a {
     text-align: center;
@@ -211,4 +223,14 @@ div.content {
 
 .withdrawals-table{
   max-width: 800px;
+}
+
+.create-meme-preview{
+  padding-top: 55px;
+  padding-left: 20px;
+}
+
+.create-idea-preview{
+  padding-top: 100px;
+  padding-left: 20px;
 }

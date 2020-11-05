@@ -3,10 +3,9 @@ import {utils} from 'near-api-js'
 const FRAC_DIGITS = 5
 class Common {
     static formatNearAmount(amount) {
-        if (!amount)
+        if (!amount || !Number(amount))
             return 0;
 
-        amount = Common.toFixed(amount);
         let ret = utils.format.formatNearAmount(amount.toString(), FRAC_DIGITS);
 
         if (amount === '0') {
@@ -36,9 +35,6 @@ class Common {
     }
 
     static GetIdeaAdvancedFields(idea, ideas){
-        console.log("GetIdeaAdvancedFields")
-        console.log(ideas)
-        console.log(idea)
         idea.price = Common.formatNearAmount(idea.price);
         idea.total_tips = Common.formatNearAmount(idea.total_tips);
         if (!idea.price && idea.proposal_id) {
