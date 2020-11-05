@@ -192,6 +192,10 @@ impl IdeaBankContract {
     }
 
     pub fn create_meme(&mut self, title: String, description: String, image: String, proposal_id: u64, link: String) -> Option<Idea> {
+        assert!(title != "", "Abort. Title is empty");
+        assert!(title.len() <= 1000, "Abort. Title is longer then 1000 characters");
+        assert!(description.len() <= 2000, "Abort. Description is longer then 2000 characters");
+
         self.max_idea_id = self.max_idea_id + 1;
         let idea_id: u64 = self.max_idea_id;
 
@@ -221,11 +225,17 @@ impl IdeaBankContract {
 
     #[payable]
     pub fn create_idea(&mut self, title: String, description: String, image: String, link: String) -> Idea {
+        assert!(title != "", "Abort. Title is empty");
+        assert!(title.len() <= 1000, "Abort. Title is longer then 1000 characters");
+        assert!(description.len() <= 2000, "Abort. Description is longer then 2000 characters");
+
+        let price: U128 = near_sdk::env::attached_deposit().into();
+        assert!(price.0 != 0, "Abort. Price is null");
+
         self.max_idea_id += 1;
         let idea_id = self.max_idea_id;
 
         let owner_account_id: String = env::predecessor_account_id();
-        let price: U128 = near_sdk::env::attached_deposit().into();
         let proposal_id: u64 = 0;
 
         let idea = Idea {
@@ -238,7 +248,7 @@ impl IdeaBankContract {
             price,
             link,
             vote_count: 0,
-            total_tips: price,
+            total_tips: 0.into(),
         };
 
         self.ideas.insert(
