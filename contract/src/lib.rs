@@ -196,7 +196,7 @@ impl IdeaBankContract {
         assert!(title.len() <= 1000, "Abort. Title is longer then 1000 characters");
         assert!(description.len() <= 2000, "Abort. Description is longer then 2000 characters");
 
-        self.max_idea_id = self.max_idea_id + 1;
+        self.max_idea_id += 1;
         let idea_id: u64 = self.max_idea_id;
 
         let owner_account_id: String = env::predecessor_account_id();
@@ -477,9 +477,7 @@ mod tests {
         "alice".to_string()
     }
 
-    fn bob() -> AccountId {
-        "bob".to_string()
-    }
+    fn bob() -> AccountId { "bob".to_string() }
 
     fn eve() -> AccountId {
         "eve".to_string()
@@ -489,9 +487,9 @@ mod tests {
     fn get_context(signer_account_id: AccountId, deposit_amount: u128) -> VMContext {
         VMContext {
             current_account_id: "owner".to_string(),
-            signer_account_id,
+            signer_account_id: signer_account_id.clone(),
             signer_account_pk: vec![0, 1, 2],
-            predecessor_account_id: "previous_owner".to_string(),
+            predecessor_account_id: signer_account_id,
             input: vec![],
             block_index: 0,
             block_timestamp: 0,
@@ -509,57 +507,79 @@ mod tests {
 
     #[test]
     fn alice_can_create_idea() {
-        /*
-                let context = get_context(alice(), MIN_DEPOSIT_AMOUNT);
-                testing_env!(context);
+        let context = get_context(alice(), MIN_DEPOSIT_AMOUNT);
+        testing_env!(context);
 
-                let mut contract = IdeaBankContract::default();
-                let title = "Near Kitties".to_string();
-                let link = "http://www.cryptokitties.co/".to_string();
+        let mut contract = IdeaBankContract::default();
+        let title = "Near Kitties".to_string();
+        let description = "Near Text".to_string();
+        let image = "http://near.org/img.png".to_string();
+        let link = "http://www.cryptokitties.co/".to_string();
 
-                let idea: Idea = contract.create_idea(title.clone(), link.clone()).unwrap();
+        let idea: Idea = contract.create_idea(title.clone(), description.clone(), image.clone(), link.clone());
 
-                assert_eq!(title, idea.title);
-                assert_eq!(link, idea.link);
-                assert_eq!(contract.ideas.len(), 1);*/
+        assert_eq!(title, idea.title);
+        assert_eq!(description, idea.description);
+        assert_eq!(image, idea.image);
+        assert_eq!(link, idea.link);
+        assert_eq!(contract.ideas.len(), 1);
     }
 
     #[test]
+    #[should_panic(expected = "Not enough balance to withdraw")]
     fn eve_can_vote_bob_idea() {
-        /*
-                let context = get_context(eve(), MIN_DEPOSIT_AMOUNT);
-                testing_env!(context);
+        let context = get_context(eve(), MIN_DEPOSIT_AMOUNT);
+        testing_env!(context);
 
-                let mut contract = IdeaBankContract::default();
-                let title = "A gambling gaming platform".to_string();
-                let link = "https://www.247freepoker.com/".to_string();
+        let mut contract = IdeaBankContract::default();
+        let title = "Near Kitties".to_string();
+        let description = "Near Text".to_string();
+        let image = "http://near.org/img.png".to_string();
+        let link = "http://www.cryptokitties.co/".to_string();
 
-                contract.ideas.insert(
-                    1,
-                    Idea {
-                        idea_id: 1,
-                        title,
-                        link,
-                        vote_count: 0,
-                        owner_account_id: bob().clone(),
-                    },
-                );
+        contract.ideas.insert(
+            &1,
+            &Idea {
+                idea_id: 1,
+                proposal_id: 0,
+                title,
+                owner_account_id: eve().clone(),
+                description,
+                image,
+                price: 10.into(),
+                link,
+                vote_count: 0,
+                total_tips: 0.into(),
+            },
+        );
 
-                let idea = contract.upvote_idea(1);
-                assert_eq!(idea.vote_count, 1);
-                assert_eq!(
-                    contract.deposits_by_owners.get(&eve()).unwrap().amount,
-                    MIN_DEPOSIT_AMOUNT
-                );
-                assert_eq!(contract.deposits_by_ideas.get(&1).unwrap().len(), 1);
-                assert_eq!(
-                    contract.deposits_by_ideas.get(&1).unwrap()[0].amount,
-                    MIN_DEPOSIT_AMOUNT
-                );
-                assert_eq!(
-                    contract.deposits_by_ideas.get(&1).unwrap()[0].owner_account_id,
-                    eve()
-                );
-                */
+        contract.tip_meme(1);
+        let idea = contract.get_idea_by_id(1).unwrap();
+
+        //let all_deposits =  contract.get_all_user_deposits();
+        //println!("DEBUG {:?}", all_deposits);
+
+        assert_eq!(idea.vote_count, 1);
+        assert_eq!(
+            contract.get_deposits_by_owner(eve()).unwrap()[0].amount,
+            MIN_DEPOSIT_AMOUNT.into()
+        );
+
+        assert_eq!(
+            contract.deposits_by_owners.get(&eve()).unwrap()[0].amount,
+            MIN_DEPOSIT_AMOUNT.into()
+        );
+        assert_eq!(contract.deposits_by_ideas.get(&1).unwrap().len(), 1);
+        assert_eq!(
+            contract.deposits_by_ideas.get(&1).unwrap()[0].amount,
+            MIN_DEPOSIT_AMOUNT.into()
+        );
+        assert_eq!(
+            contract.deposits_by_ideas.get(&1).unwrap()[0].owner_account_id,
+            eve()
+        );
+
+        let _withdraw1 = contract.withdraw(MIN_DEPOSIT_AMOUNT.into());
+        let _withdraw2 = contract.withdraw(MIN_DEPOSIT_AMOUNT.into());
     }
 }
