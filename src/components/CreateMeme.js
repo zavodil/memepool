@@ -64,6 +64,8 @@ class CreateMeme extends React.Component {
                 image: this.state.image,
                 proposal_id: this.state.proposal_id,
                 link: this.state.link || "",
+            }).then(()=>{
+                window.location.reload(false);
             });
 
             /* await this.props.contract.tip_meme({

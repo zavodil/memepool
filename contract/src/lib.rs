@@ -10,6 +10,7 @@ use near_sdk::json_types::U128;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 const MIN_DEPOSIT_AMOUNT: u128 = 1_000_000_000_000_000_000_000_000;
+const MIN_TIP_AMOUNT: u128 = 1_000_000_000_000_000_000_000;
 
 #[derive(Debug, Clone, BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
@@ -118,13 +119,11 @@ fn add_user_withdrawal(
 ) {
     let deposit_amount_u128: u128 = deposit_amount.into();
     assert!(
-        deposit_amount_u128 >= MIN_DEPOSIT_AMOUNT,
+        deposit_amount_u128 >= MIN_TIP_AMOUNT,
         "The amount of deposit is {} and it should be greater or equal to {}",
         deposit_amount_u128,
-        MIN_DEPOSIT_AMOUNT
+        MIN_TIP_AMOUNT
     );
-
-    env::log(format!("Tip @{} with {} yNEAR", account_id, deposit_amount_u128).as_bytes());
 
     match user_withdrawals.get(&account_id) {
         Some(mut idea_withdrawal) =>
@@ -229,8 +228,13 @@ impl IdeaBankContract {
         assert!(title.len() <= 1000, "Abort. Title is longer then 1000 characters");
         assert!(description.len() <= 2000, "Abort. Description is longer then 2000 characters");
 
-        let price: U128 = near_sdk::env::attached_deposit().into();
-        assert!(price.0 != 0, "Abort. Price is null");
+        let price: u128 = near_sdk::env::attached_deposit();
+        assert!(
+            price >= MIN_DEPOSIT_AMOUNT,
+            "The amount of idea deposit is {} and it should be greater or equal to {}",
+            price,
+            MIN_DEPOSIT_AMOUNT
+        );
 
         self.max_idea_id += 1;
         let idea_id = self.max_idea_id;
@@ -245,7 +249,7 @@ impl IdeaBankContract {
             owner_account_id: owner_account_id.clone(),
             description,
             image,
-            price,
+            price: price.into(),
             link,
             vote_count: 0,
             total_tips: 0.into(),
@@ -261,7 +265,7 @@ impl IdeaBankContract {
             &mut self.deposits_by_ideas,
             idea_id,
             owner_account_id,
-            price,
+            price.into()
         );
 
         idea
@@ -272,10 +276,10 @@ impl IdeaBankContract {
         let deposit_sender_amount = env::attached_deposit();
         let sender_account_id: String = env::predecessor_account_id();
         assert!(
-            deposit_sender_amount >= MIN_DEPOSIT_AMOUNT,
+            deposit_sender_amount >= MIN_TIP_AMOUNT,
             "The amount of deposit is {} and it should be greater or equal to {}",
             deposit_sender_amount,
-            MIN_DEPOSIT_AMOUNT
+            MIN_TIP_AMOUNT
         );
 
         let mut idea = self.ideas.get(&idea_id).expect("Idea doesn't exist");
@@ -295,35 +299,6 @@ impl IdeaBankContract {
             sender_account_id,
             deposit_sender_amount.into(),
         );
-    }
-
-    pub fn upvote_idea(&mut self, idea_id: u64) -> bool {
-        let deposit_sender_amount = env::attached_deposit();
-        let sender_account_id: String = env::predecessor_account_id();
-        assert!(
-            deposit_sender_amount >= MIN_DEPOSIT_AMOUNT,
-            "The amount of deposit is {} and it should be greater than equal to {}",
-            deposit_sender_amount,
-            MIN_DEPOSIT_AMOUNT
-        );
-
-        match self.ideas.get(&idea_id) {
-            Some(mut idea) => {
-                idea.vote_count += 1;
-                idea.total_tips = (idea.total_tips.0 + deposit_sender_amount).into();
-                add_deposit(
-                    &mut self.deposits_by_owners,
-                    &mut self.deposits_by_ideas,
-                    idea_id,
-                    sender_account_id,
-                    deposit_sender_amount.into(),
-                );
-                true
-            }
-            None => {
-                false
-            }
-        }
     }
 
     pub fn get_num_ideas(&self) -> u64 {

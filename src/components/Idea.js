@@ -24,6 +24,24 @@ function smartTrim(str, length, delim, appendix) {
     return trimmedStr;
 }
 
+function formatUrl(url) {
+    let httpString = "http://";
+    let httpsString = "https://";
+    if (url.substr(0, httpString.length).toLowerCase() !== httpString && url.substr(0, httpsString.length).toLowerCase() !== httpsString)
+        url = httpString + url;
+    return validURL(url) ? url : "";
+}
+
+function validURL(str) {
+    let pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(str);
+}
+
 const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccountId, aloneMode}) => {
     if(aloneMode === undefined)
         aloneMode = false;
@@ -112,7 +130,7 @@ const Idea = ({idea, toggleTipModal, submitMeme, chooseWinnerMeme, currentAccoun
 
     let detailsBlock = (idea.link) ? <div className="px-6 py-4">
         <div className="text-gray-700 text-base">
-            <p className='text-base text-gray-600 leading-normal'><a href={idea.link}>Details</a></p>
+            <p className='text-base text-gray-600 leading-normal'><a href={formatUrl(idea.link)}>Details</a></p>
         </div>
     </div> : "";
 

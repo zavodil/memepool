@@ -14,7 +14,8 @@ class CreateIdea extends React.Component {
             image: "",
             price: 0,
             toHome: false,
-            valid: true
+            valid: true,
+            priceTooSmall: false
         };
     }
 
@@ -29,6 +30,7 @@ class CreateIdea extends React.Component {
         this.setState({
             ...this.state,
             price: val,
+            priceTooSmall: (parseFloat(val) < 1)
         });
     }
 
@@ -56,7 +58,7 @@ class CreateIdea extends React.Component {
     }
 
     async CreateIdea() {
-        if (this.state.title.length === 0 || parseFloat(this.state.price) === 0)
+        if (this.state.title.length === 0 || parseFloat(this.state.price) === 0 || this.state.priceTooSmall)
             return null;
 
         this.setState({
@@ -83,6 +85,8 @@ class CreateIdea extends React.Component {
         }
         const preview = this.state.image ?
             (this.state.valid_image ? <img src={this.state.image} width={200}/> : <div>Invalid image link</div>) : "";
+
+        const priceTooSmall = this.state.priceTooSmall  ? <div>Price should be bigger than 1 NEAR</div> : "";
 
         return (
             <div className='form-container flex flex-col'>
@@ -126,6 +130,7 @@ class CreateIdea extends React.Component {
                                                 placeholder='Price proposal'
                                             />
                                         </Col>
+                                        {priceTooSmall}
                                         <Col className='my-5'>
                                             <Form.Control
                                                 onChange={(e) => {

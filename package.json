@@ -14,7 +14,8 @@
         "prestart": "npm run build:contract && npm run dev:deploy:contract && npm run build:css",
         "start": "export PORT=1235 && env-cmd -f ./neardev/dev-account.env parcel src/index.html",
         "dev": "nodemon --watch assembly -e ts --exec \"npm run start\"",
-        "test": "(cd contract && cargo test -- --nocapture && cd ..) && npm run build:contract"
+        "test": "(cd contract && cargo test -- --nocapture && cd ..)",
+        "test2": "(cd contract && cargo test -- --nocapture && cd ..) && npm run build:contract"
     },
     "devDependencies": {
         "@babel/plugin-transform-runtime": "^7.11.0",

@@ -119,7 +119,7 @@ class App extends Component {
                         const withdrawal = withdrawals[index];
                         withdrawal.amount_paid = Number(utils.format.formatNearAmount(withdrawal.amount_paid, FRAC_DIGITS));
                         withdrawal.amount_remaining = Number(utils.format.formatNearAmount(withdrawal.amount_remaining, FRAC_DIGITS));
-                        withdrawal.total = withdrawal.amount_paid + withdrawal.amount_remaining;
+                        withdrawal.total = (withdrawal.amount_paid + withdrawal.amount_remaining).toFixed(FRAC_DIGITS);
 
                         if (withdrawal.owner_account_id === this.GetConnectedAccountId()) {
                             this.setState({
@@ -153,7 +153,7 @@ class App extends Component {
                             for (let deposit of user_deposits[user_account_id]) {
                                 user_total_deposit += Number(utils.format.formatNearAmount(deposit.amount, FRAC_DIGITS));
                             }
-                            user_deposits[user_account_id].amount = user_total_deposit || 0;
+                            user_deposits[user_account_id].amount = user_total_deposit.toFixed(FRAC_DIGITS) || 0;
                             user_deposits[user_account_id].account_id = user_account_id;
                         }
 
@@ -193,7 +193,7 @@ class App extends Component {
         try {
             await this.props.contract.withdraw(
                 {
-                    amount: utils.format.parseNearAmount(withdraw_amount)
+                    amount: utils.format.parseNearAmount(withdraw_amount.toString())
                 }
             );
         } catch (err) {
@@ -235,25 +235,6 @@ class App extends Component {
                     proposal_id
                 },
                 null
-            );
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-
-    upvoteIdea = async ({idea_id}) => {
-        if (!this.props.wallet.isSignedIn()) {
-            window.alert("You need to sign in to vote!");
-            return;
-        }
-        try {
-            await this.props.contract.upvote_idea(
-                {
-                    idea_id,
-                },
-                null,
-                MIN_DEPOSIT_AMOUNT
             );
         } catch (err) {
             console.error(err);
@@ -318,6 +299,7 @@ class App extends Component {
                         Added: {this.state.ideas.length}</h2>
 
                     <h2 className='py-4 justify-center underline'><a href="/withdrawals">Withdrawals</a></h2>
+                    <h4 className='py-4 justify-center underline'><a href="https://github.com/zavodil/memepool">Open Source</a> by <a href="https://near.zavodil.ru">Zavodil</a>.</h4>
                 </div>
 
             </div>;
@@ -350,6 +332,7 @@ class App extends Component {
         };
 
         const RenderIdeaPage = (props) => {
+            console.log(props);
             return <div className="form-container">
                 <RenderLeftSidebar/>
                 <div className="content">
@@ -492,7 +475,10 @@ class App extends Component {
                 </div>
                 <div>
                     <button className='w-7 p-2 near-btn mb-auto align-top' onClick={() => {
-                        this.tipMeme(this.state.TipModalIdea, this.tipAmount, this.state.TipModalOwnerAccountId)
+                        if(parseFloat(this.tipAmount) < 0.001)
+                            window.alert("Price should be bigger than 0.001 NEAR");
+                        else
+                            this.tipMeme(this.state.TipModalIdea, this.tipAmount, this.state.TipModalOwnerAccountId)
                     }}>
                         Tip NEAR tokens
                     </button>
@@ -506,6 +492,8 @@ class App extends Component {
         helmetProps.hashtag = "";
         helmetProps.location = {};
         helmetProps.location.pathname = "/memeguild";
+        console.log("props");
+        console.log(this.props);
         return (
             <main>
                 <HelmetMetaData props={helmetProps}></HelmetMetaData>
